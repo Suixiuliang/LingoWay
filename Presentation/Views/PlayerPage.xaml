@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="LingoWay.Views.PlayerPage"
+             Title="播放"
+             BackgroundColor="#0A0E27">
+
+    <Grid RowDefinitions="*,Auto,Auto" Padding="0">
+
+        <!-- 封面和播放信息 -->
+        <StackLayout Grid.Row="0" Spacing="20" Padding="20" VerticalOptions="CenterAndExpand">
+
+            <!-- 封面 -->
+            <Frame CornerRadius="20" 
+                   HasShadow="True"
+                   BorderColor="#242A45"
+                   BackgroundColor="#1A1F3A"
+                   Padding="0"
+                   HeightRequest="300"
+                   WidthRequest="300"
+                   HorizontalOptions="Center">
+                <Image Source="dotnet_bot.png" 
+                       Aspect="AspectFill"/>
+            </Frame>
+
+            <!-- 标题 -->
+            <Label Text="英语学习剧集标题" 
+                   TextColor="#E8E9ED"
+                   FontSize="20"
+                   FontAttributes="Bold"
+                   HorizontalTextAlignment="Center"/>
+
+            <!-- 时间信息 -->
+            <Label Text="00:00 / 30:00" 
+                   TextColor="#A0A5B3"
+                   FontSize="14"
+                   HorizontalTextAlignment="Center"/>
+        </StackLayout>
+
+        <!-- 字幕区域 -->
+        <Frame Grid.Row="1"
+               CornerRadius="15"
+               HasShadow="True"
+               BorderColor="#242A45"
+               BackgroundColor="#242A45"
+               Margin="15"
+               Padding="10">
+            <StackLayout Spacing="5">
+                <Label Text="English Text" 
+                       TextColor="#E8E9ED"
+                       FontSize="16"
+                       FontAttributes="Bold"
+                       LineBreakMode="WordWrap"/>
+                <Label Text="中文翻译文本" 
+                       TextColor="#A0A5B3"
+                       FontSize="14"
+                       LineBreakMode="WordWrap"/>
+            </StackLayout>
+        </Frame>
+
+        <!-- 播放控制栏 -->
+        <StackLayout Grid.Row="2" 
+                    Spacing="15"
+                    Padding="20"
+                    BackgroundColor="#1A1F3A">
+
+            <!-- 进度条 -->
+            <Slider Value="0" 
+                   Maximum="100"
+                   BackgroundColor="{StaticResource CardBackground}"
+                   ThumbColor="{StaticResource Primary}"
+                   MinimumTrackColor="{StaticResource Primary}"
+                   Margin="0"/>
+
+            <!-- 控制按钮 -->
+            <Grid ColumnDefinitions="*,*,*,*,*" ColumnSpacing="10">
+                <Button Grid.Column="0" 
+                       Text="🔀" 
+                       TextColor="{StaticResource TextPrimary}"
+                       BackgroundColor="Transparent"
+                       FontSize="18"/>
+
+                <Button Grid.Column="1" 
+                       Text="⏮" 
+                       TextColor="{StaticResource TextPrimary}"
+                       BackgroundColor="Transparent"
+                       FontSize="18"/>
+
+                <Button Grid.Column="2" 
+                       Text="⏯" 
+                       TextColor="{StaticResource Secondary}"
+                       BackgroundColor="{StaticResource Primary}"
+                       FontSize="18"
+                       Padding="20"/>
+
+                <Button Grid.Column="3" 
+                       Text="⏭" 
+                       TextColor="{StaticResource TextPrimary}"
+                       BackgroundColor="Transparent"
+                       FontSize="18"/>
+
+                <Button Grid.Column="4" 
+                       Text="🔁" 
+                       TextColor="{StaticResource TextPrimary}"
+                       BackgroundColor="Transparent"
+                       FontSize="18"/>
+            </Grid>
+
+            <!-- 倍速 -->
+            <StackLayout Orientation="Horizontal" Spacing="5" HorizontalOptions="Center">
+                <Button Text="0.5x" 
+                       TextColor="{StaticResource TextSecondary}"
+                       BackgroundColor="Transparent"
+                       Padding="10"/>
+                <Button Text="1.0x" 
+                       TextColor="{StaticResource Secondary}"
+                       BackgroundColor="{StaticResource Primary}"
+                       Padding="10"/>
+                <Button Text="1.5x" 
+                       TextColor="{StaticResource TextSecondary}"
+                       BackgroundColor="Transparent"
+                       Padding="10"/>
+                <Button Text="2.0x" 
+                       TextColor="{StaticResource TextSecondary}"
+                       BackgroundColor="Transparent"
+                       Padding="10"/>
+            </StackLayout>
+        </StackLayout>
+
+    </Grid>
+
+</ContentPage>

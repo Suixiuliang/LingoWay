@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="LingoWay.Presentation.Components.EpisodeCard"
+             BackgroundColor="Transparent">
+
+    <Frame CornerRadius="15"
+           HasShadow="True"
+           BorderColor="#242A45"
+           BackgroundColor="#242A45"
+           Padding="10"
+           Margin="10,5">
+
+        <Grid ColumnDefinitions="80,*,Auto" ColumnSpacing="10" RowSpacing="0">
+            <!-- 封面 -->
+            <Frame Grid.Column="0"
+                   CornerRadius="10"
+                   Padding="0"
+                   IsClippedToBounds="True"
+                   HeightRequest="80"
+                   WidthRequest="80"
+                   BackgroundColor="Transparent">
+                <Image Source="{Binding CoverUrl}" Aspect="AspectFill" />
+            </Frame>
+
+            <!-- 信息 -->
+            <StackLayout Grid.Column="1" Spacing="5" VerticalOptions="Center">
+                <Label Text="{Binding Title}"
+                      TextColor="#E8E9ED"
+                      FontSize="14"
+                      FontAttributes="Bold"
+                      LineBreakMode="TailTruncation"/>
+
+                <Label Text="{Binding Podcast.Title}"
+                      TextColor="#A0A5B3"
+                      FontSize="12"/>
+
+                <Label Text="{Binding Duration, StringFormat='{0:hh\\:mm}'}"
+                      TextColor="#6B7280"
+                      FontSize="10"/>
+            </StackLayout>
+
+            <!-- 操作按钮 -->
+            <StackLayout Grid.Column="2"
+                        Spacing="5"
+                        VerticalOptions="Center"
+                        HorizontalOptions="End">
+                <Button Text="⏯"
+                       TextColor="#E8E9ED"
+                       BackgroundColor="#6366F1"
+                       Padding="10"
+                       FontSize="16"
+                       WidthRequest="40"
+                       HeightRequest="40"/>
+
+                <Button Text="❤️"
+                       TextColor="#EF4444"
+                       BackgroundColor="Transparent"
+                       Padding="5"
+                       FontSize="14"
+                       WidthRequest="30"
+                       HeightRequest="30"/>
+            </StackLayout>
+        </Grid>
+    </Frame>
+
+</ContentView>

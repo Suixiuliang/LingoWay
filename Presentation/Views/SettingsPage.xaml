@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="LingoWay.Views.SettingsPage"
+             Title="设置"
+             BackgroundColor="#0A0E27">
+
+    <ScrollView>
+        <StackLayout Spacing="20" Padding="20">
+
+            <!-- 播放设置 -->
+            <StackLayout Spacing="10">
+                <Label Text="播放设置" 
+                       TextColor="#E8E9ED"
+                       FontSize="18"
+                       FontAttributes="Bold"/>
+
+                <Frame CornerRadius="10"
+                      BackgroundColor="#242A45"
+                      BorderColor="#242A45"
+                      Padding="15">
+                    <StackLayout Spacing="10">
+                        <Label Text="默认倍速"
+                              TextColor="#E8E9ED"
+                              FontSize="14"/>
+                        <Picker SelectedIndex="0"
+                               TextColor="#E8E9ED"
+                               BackgroundColor="#1A1F3A">
+                            <Picker.Items>
+                                <x:String>0.5x</x:String>
+                                <x:String>0.75x</x:String>
+                                <x:String>1.0x</x:String>
+                                <x:String>1.25x</x:String>
+                                <x:String>1.5x</x:String>
+                                <x:String>2.0x</x:String>
+                            </Picker.Items>
+                        </Picker>
+
+                        <BoxView HeightRequest="1" Color="#1A1F3A" Margin="0,10"/>
+
+                        <Label Text="后台播放"
+                              TextColor="#E8E9ED"
+                              FontSize="14"/>
+                        <Switch IsToggled="True" ThumbColor="#6366F1"/>
+                    </StackLayout>
+
+            <!-- 主题（亮/暗/系统） -->
+            <StackLayout Spacing="10">
+                <Label Text="主题" 
+                       TextColor="{StaticResource TextPrimaryDark}"
+                       FontSize="18"
+                       FontAttributes="Bold"/>
+
+                <Frame CornerRadius="10"
+                      BackgroundColor="{AppThemeBinding Light={StaticResource CardBackgroundLight}, Dark={StaticResource CardBackgroundDark}}"
+                      BorderColor="Transparent"
+                      Padding="10">
+                    <StackLayout Orientation="Horizontal" Spacing="10" HorizontalOptions="Center">
+                        <Button Text="亮色" Clicked="OnLightThemeClicked"/>
+                        <Button Text="暗色" Clicked="OnDarkThemeClicked"/>
+                        <Button Text="系统" Clicked="OnSystemThemeClicked"/>
+                    </StackLayout>
+                </Frame>
+            </StackLayout>
+                </Frame>
+            </StackLayout>
+
+            <!-- 字幕设置 -->
+            <StackLayout Spacing="10">
+                <Label Text="字幕设置" 
+                       TextColor="#E8E9ED"
+                       FontSize="18"
+                       FontAttributes="Bold"/>
+
+                <Frame CornerRadius="10"
+                      BackgroundColor="#242A45"
+                      BorderColor="#242A45"
+                      Padding="15">
+                    <StackLayout Spacing="10">
+                        <Label Text="字幕语言"
+                              TextColor="#E8E9ED"
+                              FontSize="14"/>
+                        <Picker SelectedIndex="0"
+                               TextColor="#E8E9ED"
+                               BackgroundColor="#1A1F3A">
+                            <Picker.Items>
+                                <x:String>英文</x:String>
+                                <x:String>中文</x:String>
+                                <x:String>双语</x:String>
+                            </Picker.Items>
+                        </Picker>
+
+                        <BoxView HeightRequest="1" Color="#1A1F3A" Margin="0,10"/>
+
+                        <Label Text="字体大小"
+                              TextColor="#E8E9ED"
+                              FontSize="14"/>
+                        <Slider Value="16" 
+                               Minimum="12"
+                               Maximum="24"
+                               ThumbColor="#6366F1"/>
+                    </StackLayout>
+                </Frame>
+            </StackLayout>
+
+            <!-- 下载设置 -->
+            <StackLayout Spacing="10">
+                <Label Text="下载设置" 
+                       TextColor="#E8E9ED"
+                       FontSize="18"
+                       FontAttributes="Bold"/>
+
+                <Frame CornerRadius="10"
+                      BackgroundColor="#242A45"
+                      BorderColor="#242A45"
+                      Padding="15">
+                    <StackLayout Spacing="10">
+                        <Label Text="仅在WIFI下下载"
+                              TextColor="#E8E9ED"
+                              FontSize="14"/>
+                        <Switch ThumbColor="#6366F1"/>
+                    </StackLayout>
+                </Frame>
+            </StackLayout>
+
+            <!-- 关于 -->
+            <StackLayout Spacing="10">
+                <Label Text="关于" 
+                       TextColor="#E8E9ED"
+                       FontSize="18"
+                       FontAttributes="Bold"/>
+
+                <Frame CornerRadius="10"
+                      BackgroundColor="#242A45"
+                      BorderColor="#242A45"
+                      Padding="15">
+                    <StackLayout Spacing="10">
+                        <Label Text="版本 1.0.0"
+                              TextColor="#E8E9ED"
+                              FontSize="14"/>
+                        <Label Text="© 2025 LingoWay" 
+                               TextColor="#A0A5B3"
+                               FontSize="12"/>
+                    </StackLayout>
+                </Frame>
+            </StackLayout>
+
+            <!-- 保存按钮 -->
+            <Button Text="保存设置" 
+                   TextColor="#FFF"
+                   BackgroundColor="#6366F1"
+                   CornerRadius="10"
+                   Padding="20"
+                   FontSize="16"
+                   FontAttributes="Bold"
+                   Margin="0,20"/>
+
+        </StackLayout>
+    </ScrollView>
+
+</ContentPage>

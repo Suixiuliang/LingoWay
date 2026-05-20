@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="LingoWay.Views.BrowsePage"
+             Title="发现"
+             BackgroundColor="#0A0E27">
+
+    <Grid RowDefinitions="Auto,*" Padding="0">
+
+        <!-- 搜索栏 -->
+        <SearchBar x:Name="SearchBar"
+                   Grid.Row="0"
+                   Placeholder="搜索播客或剧集..."
+                   TextColor="#E8E9ED"
+                   PlaceholderColor="#6B7280"
+                   BackgroundColor="#1A1F3A"
+                   SearchButtonPressed="OnSearchButtonPressed"
+                   Margin="10"/>
+
+        <!-- 内容列表 -->
+        <CollectionView Grid.Row="1"
+                       SelectionMode="Single"
+                       SelectionChangedCommand="{Binding SelectPodcastCommand}">
+
+            <CollectionView.ItemsSource>
+                <x:Array Type="{x:Type x:String}">
+                    <x:String>VOA慢速英语</x:String>
+                    <x:String>BBC Learning English</x:String>
+                    <x:String>TED演讲</x:String>
+                    <x:String>英语新闻</x:String>
+                </x:Array>
+            </CollectionView.ItemsSource>
+
+            <CollectionView.ItemTemplate>
+                <DataTemplate>
+                    <Frame Margin="10,5" 
+                          CornerRadius="15"
+                          HasShadow="True"
+                          BorderColor="#242A45"
+                          BackgroundColor="#242A45"
+                          Padding="0">
+                        <Grid ColumnDefinitions="80,*" ColumnSpacing="10" Padding="10">
+                            <!-- 封面 -->
+                            <Frame Grid.Column="0" CornerRadius="10" Padding="0" IsClippedToBounds="True" HeightRequest="80" WidthRequest="80" BackgroundColor="Transparent">
+                                <Image Source="dotnet_bot.png" Aspect="AspectFill" />
+                            </Frame>
+
+                            <!-- 信息 -->
+                            <StackLayout Grid.Column="1" Spacing="5">
+                                <Label Text="{Binding .}"
+                                      TextColor="#E8E9ED"
+                                      FontSize="14"
+                                      FontAttributes="Bold"/>
+                                <Label Text="高质量英语学习资源"
+                                      TextColor="#A0A5B3"
+                                      FontSize="12"/>
+                                <Label Text="💚 已订阅"
+                                      TextColor="#10B981"
+                                      FontSize="10"/>
+                            </StackLayout>
+                        </Grid>
+                    </Frame>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+
+    </Grid>
+
+    <ContentPage.ToolbarItems>
+        <ToolbarItem Text="刷新" 
+                     Command="{Binding RefreshCommand}"
+                     Order="Primary"/>
+        <ToolbarItem Text="添加" 
+                     Command="{Binding AddCustomPodcastCommand}"
+                     Order="Primary"/>
+    </ContentPage.ToolbarItems>
+
+</ContentPage>

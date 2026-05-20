@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Shell
+    x:Class="LingoWay.AppShell"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:local="clr-namespace:LingoWay"
+    xmlns:views="clr-namespace:LingoWay.Views"
+    Title="LingoWay - 听途">
+
+    <!-- 标签栏导航 -->
+    <TabBar>
+
+        <!-- 发现更多 -->
+        <ShellContent Title="发现更多"
+                      ContentTemplate="{DataTemplate views:BrowsePage}"
+                      Route="BrowsePage" />
+
+        <!-- 我的收藏 -->
+        <ShellContent Title="我的收藏"
+                      ContentTemplate="{DataTemplate views:FavoritesPage}"
+                      Route="FavoritesPage" />
+
+        <!-- 播放中（主页） -->
+        <ShellContent Title="播放中"
+                      ContentTemplate="{DataTemplate views:PlayerPage}"
+                      Route="PlayerPage" />
+
+        <!-- 频道 -->
+        <ShellContent Title="频道"
+                      ContentTemplate="{DataTemplate views:BrowsePage}"
+                      Route="ChannelsPage" />
+
+        <!-- 设置 -->
+        <ShellContent Title="设置"
+                      ContentTemplate="{DataTemplate views:SettingsPage}"
+                      Route="SettingsPage" />
+    </TabBar>
+
+</Shell>
