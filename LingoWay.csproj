@@ -80,6 +80,8 @@
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
+		<PackageReference Include="Sharpnado.MaterialFrame.Maui" Version="3.0.2" />
+		<PackageReference Include="SkiaSharp" Version="3.119.4" />
 
 		<!-- HTTP������ -->
 		<PackageReference Include="System.Net.Http" Version="4.3.4" />
@@ -87,6 +89,7 @@
 
 		<!-- ���߿� -->
 		<PackageReference Include="System.IO.Abstractions" Version="21.2.1" />
+		<PackageReference Include="taglib" Version="2.1.0" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -111,7 +114,13 @@
 	  <MauiXaml Update="Presentation\Views\SettingsPage.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
-	  <MauiXaml Update="Resources\Styles\Colors.xaml">
+	  <MauiXaml Update="Presentation\Views\VocabularyPage.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </MauiXaml>
+	  <MauiXaml Update="Resources\Styles\DarkColors.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </MauiXaml>
+	  <MauiXaml Update="Resources\Styles\LightColors.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
 	</ItemGroup>

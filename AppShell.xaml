@@ -25,10 +25,10 @@
                       ContentTemplate="{DataTemplate views:PlayerPage}"
                       Route="PlayerPage" />
 
-        <!-- 频道 -->
-        <ShellContent Title="频道"
-                      ContentTemplate="{DataTemplate views:BrowsePage}"
-                      Route="ChannelsPage" />
+        <!-- 单词本 -->
+        <ShellContent Title="单词本"
+                      ContentTemplate="{DataTemplate views:VocabularyPage}"
+                      Route="VocabularyPage" />
 
         <!-- 设置 -->
         <ShellContent Title="设置"

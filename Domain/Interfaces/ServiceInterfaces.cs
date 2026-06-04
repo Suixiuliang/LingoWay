@@ -63,9 +63,11 @@ public interface IVocabularyService
     Task<Vocabulary?> GetVocabularyAsync(string word);
     Task<List<Vocabulary>> ExtractVocabularyFromTextAsync(string text);
     Task<List<Vocabulary>> GetUserVocabularyAsync();
-    Task AddToUserVocabularyAsync(string word);
+    Task AddToUserVocabularyAsync(string word, string? episodeId = null, int? lrcLineId = null, int? positionInLine = null);
     Task RemoveFromUserVocabularyAsync(string word);
     Task UpdateMasteryLevelAsync(string word, int level);
+    Task<HashSet<string>> GetMarkedWordsAsync(string? episodeId = null);
+    Task<Dictionary<string, int>> GetUserVocabularyWithLevelsAsync();
 }
 
 /// <summary>
@@ -88,6 +90,8 @@ public interface IContentProvider
     Task<Episode?> GetEpisodeAsync(string episodeId);
     Task RefreshPodcastsAsync();
     Task AddCustomPodcastAsync(string rssUrl);
+    Task DeletePodcastAsync(string podcastId);
+    Task SeedDefaultPodcastsAsync();
 }
 
 /// <summary>

@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="LingoWay.Views.VocabularyPage"
+             Title="单词本"
+             BackgroundColor="{DynamicResource BackgroundPrimary}">
+
+    <Grid RowDefinitions="Auto,Auto,*,Auto" Padding="20">
+
+        <!-- 搜索栏 + 批量管理 -->
+        <Border Grid.Row="0"
+                StrokeShape="RoundRectangle 16"
+                BackgroundColor="#17181C"
+                Stroke="#22FFFFFF"
+                Padding="12,8"
+                Margin="0,0,0,12">
+            <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="8">
+                <SearchBar x:Name="SearchBar"
+                           Placeholder="搜索生词..."
+                           PlaceholderColor="#6B7280"
+                           TextColor="White"
+                           BackgroundColor="Transparent"
+                           SearchButtonPressed="OnSearch"/>
+                <Button Grid.Column="1"
+                        Text="清空"
+                        BackgroundColor="#2D2D2D"
+                        TextColor="White"
+                        CornerRadius="4"
+                        BorderWidth="1"
+                        BorderColor="#3D3D3D"
+                        Padding="12,8"
+                        FontSize="12"
+                        Clicked="OnClearSearch"/>
+                <Button Grid.Column="2"
+                        x:Name="BatchToggleBtn"
+                        Text="批量管理"
+                        BackgroundColor="#005FB8"
+                        TextColor="White"
+                        CornerRadius="4"
+                        Padding="12,8"
+                        FontSize="12"
+                        Clicked="OnToggleBatchMode"/>
+            </Grid>
+        </Border>
+
+        <!-- Tab 切换栏 -->
+        <HorizontalStackLayout Grid.Row="1" Spacing="8" Margin="0,0,0,12">
+            <Border x:Name="TabNew"
+                    StrokeShape="RoundRectangle 4"
+                    BackgroundColor="#005FB8" Stroke="Transparent" Padding="16,8">
+                <Border.GestureRecognizers>
+                    <TapGestureRecognizer Tapped="OnTabNewTapped"/>
+                </Border.GestureRecognizers>
+                <HorizontalStackLayout Spacing="6">
+                    <Label Text="🆕" FontSize="13" VerticalOptions="Center"/>
+                    <Label Text="新词" TextColor="White" FontSize="14" FontAttributes="Bold" VerticalOptions="Center"/>
+                </HorizontalStackLayout>
+            </Border>
+            <Border x:Name="TabLearning"
+                    StrokeShape="RoundRectangle 4"
+                    BackgroundColor="#2D2D2D" Stroke="#3D3D3D" Padding="16,8">
+                <Border.GestureRecognizers>
+                    <TapGestureRecognizer Tapped="OnTabLearningTapped"/>
+                </Border.GestureRecognizers>
+                <HorizontalStackLayout Spacing="6">
+                    <Label Text="📖" FontSize="13" VerticalOptions="Center"/>
+                    <Label Text="学习中" TextColor="#9CA3AF" FontSize="14" VerticalOptions="Center"/>
+                </HorizontalStackLayout>
+            </Border>
+            <Border x:Name="TabMastered"
+                    StrokeShape="RoundRectangle 4"
+                    BackgroundColor="#2D2D2D" Stroke="#3D3D3D" Padding="16,8">
+                <Border.GestureRecognizers>
+                    <TapGestureRecognizer Tapped="OnTabMasteredTapped"/>
+                </Border.GestureRecognizers>
+                <HorizontalStackLayout Spacing="6">
+                    <Label Text="✅" FontSize="13" VerticalOptions="Center"/>
+                    <Label Text="已掌握" TextColor="#9CA3AF" FontSize="14" VerticalOptions="Center"/>
+                </HorizontalStackLayout>
+            </Border>
+        </HorizontalStackLayout>
+
+        <!-- 单词列表 -->
+        <CollectionView Grid.Row="2"
+                        x:Name="VocabCollectionView"
+                        SelectionMode="None">
+            <CollectionView.ItemsLayout>
+                <LinearItemsLayout Orientation="Vertical" ItemSpacing="6"/>
+            </CollectionView.ItemsLayout>
+            <CollectionView.ItemTemplate>
+                <DataTemplate>
+                    <Border StrokeShape="RoundRectangle 16"
+                            BackgroundColor="#17181C"
+                            Stroke="#22FFFFFF"
+                            Padding="16,14">
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer Tapped="OnWordTapped"
+                                                  BindingContext="{Binding .}"/>
+                        </Border.GestureRecognizers>
+                        <Grid RowDefinitions="Auto,Auto" ColumnDefinitions="Auto,*,Auto" RowSpacing="4" ColumnSpacing="10">
+                            <!-- 批量选择 CheckBox -->
+                            <CheckBox Grid.Row="0" Grid.RowSpan="2" Grid.Column="0"
+                                      x:Name="BatchCheckBox"
+                                      IsChecked="{Binding IsSelected}"
+                                      Color="#2D7DFF"
+                                      IsVisible="False"
+                                      VerticalOptions="Center"/>
+                            <Label Grid.Row="0" Grid.Column="1"
+                                   Text="{Binding Word}"
+                                   TextColor="White"
+                                   FontSize="17"
+                                   FontAttributes="Bold"/>
+                            <Label Grid.Row="0" Grid.Column="2"
+                                   Text="{Binding MasteryText}"
+                                   TextColor="{Binding MasteryColor}"
+                                   FontSize="11"
+                                   VerticalTextAlignment="Center"/>
+                            <Label Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2"
+                                   Text="{Binding DisplayInfo}"
+                                   TextColor="#9CA3AF"
+                                   FontSize="12"
+                                   LineBreakMode="TailTruncation"/>
+                        </Grid>
+                    </Border>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+            <CollectionView.EmptyView>
+                <VerticalStackLayout Padding="40" Spacing="16" HorizontalOptions="Center" VerticalOptions="Center">
+                    <Label Text="📚" FontSize="48" HorizontalOptions="Center"/>
+                    <Label x:Name="EmptyLabel" Text="还没有收集生词"
+                           FontSize="18" TextColor="White" HorizontalOptions="Center"/>
+                    <Label Text="在播放器中点击歌词单词即可添加到生词本"
+                           FontSize="14" TextColor="#6B7280" HorizontalOptions="Center" HorizontalTextAlignment="Center"/>
+                </VerticalStackLayout>
+            </CollectionView.EmptyView>
+        </CollectionView>
+
+        <!-- 批量操作栏 -->
+        <Grid Grid.Row="3"
+              x:Name="BatchBar"
+              IsVisible="False"
+              ColumnDefinitions="Auto,*,Auto,Auto"
+              ColumnSpacing="10"
+              Margin="0,12,0,0">
+            <Button Grid.Column="0" Text="全选" Clicked="OnSelectAll"
+                    BackgroundColor="#2D2D2D" TextColor="White" CornerRadius="4" FontSize="12" Padding="14,8"
+                    BorderWidth="1" BorderColor="#3D3D3D"/>
+            <Label Grid.Column="1"
+                   x:Name="BatchCountLabel"
+                   Text="已选 0 项"
+                   TextColor="#9CA3AF" FontSize="13" VerticalOptions="Center" HorizontalOptions="Center"/>
+            <Button Grid.Column="2" Text="已掌握" Clicked="OnBatchMaster"
+                    BackgroundColor="#10893E" TextColor="White" CornerRadius="4" FontSize="12" Padding="14,8"/>
+            <Button Grid.Column="3" Text="删除" Clicked="OnBatchDelete"
+                    BackgroundColor="#C42B1C" TextColor="White" CornerRadius="4" FontSize="12" Padding="14,8"/>
+        </Grid>
+    </Grid>
+</ContentPage>

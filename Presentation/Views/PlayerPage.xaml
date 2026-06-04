@@ -3,130 +3,485 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="LingoWay.Views.PlayerPage"
              Title="播放"
-             BackgroundColor="#0A0E27">
+             BackgroundColor="{DynamicResource BackgroundPrimary}">
 
-    <Grid RowDefinitions="*,Auto,Auto" Padding="0">
+    <Grid>
+        <Grid x:Name="BlurOverlay"
+              IsVisible="False"
+              InputTransparent="True"
+              Margin="0,52,0,0">
+            <Image x:Name="CoverBlurImage"
+                   Source="empty.png"
+                   Aspect="AspectFill"
+                   InputTransparent="True"/>
+            <Border BackgroundColor="#99000000"
+                    Stroke="Transparent"
+                    InputTransparent="True"/>
+        </Grid>
 
-        <!-- 封面和播放信息 -->
-        <StackLayout Grid.Row="0" Spacing="20" Padding="20" VerticalOptions="CenterAndExpand">
+        <ScrollView x:Name="PageScrollView">
+        <Grid Padding="20" HorizontalOptions="Center" MaximumWidthRequest="1280" RowSpacing="20">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
 
-            <!-- 封面 -->
-            <Frame CornerRadius="20" 
-                   HasShadow="True"
-                   BorderColor="#242A45"
-                   BackgroundColor="#1A1F3A"
-                   Padding="0"
-                   HeightRequest="300"
-                   WidthRequest="300"
-                   HorizontalOptions="Center">
-                <Image Source="dotnet_bot.png" 
-                       Aspect="AspectFill"/>
-            </Frame>
+            <Grid x:Name="TopSectionGrid"
+                  Grid.Row="0"
+                  ColumnSpacing="24"
+                  RowSpacing="20">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="400"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
 
-            <!-- 标题 -->
-            <Label Text="英语学习剧集标题" 
-                   TextColor="#E8E9ED"
-                   FontSize="20"
-                   FontAttributes="Bold"
-                   HorizontalTextAlignment="Center"/>
+                <Border x:Name="CoverPanel"
+                        Grid.Row="0"
+                        Grid.Column="0"
+                        StrokeShape="RoundRectangle 28"
+                        Stroke="#22FFFFFF"
+                        BackgroundColor="#17181C"
+                        Padding="20">
+                    <VerticalStackLayout Spacing="18">
+                        <Border StrokeShape="RoundRectangle 24"
+                                BackgroundColor="#22252B"
+                                Stroke="#2FFFFFFF"
+                                HeightRequest="360"
+                                Padding="0">
+                            <Grid>
+                                <Image x:Name="CoverImage"
+                                       Source="empty.png"
+                                       Aspect="AspectFill"/>
+                                <Grid BackgroundColor="#33000000"
+                                      RowDefinitions="*,Auto"
+                                      Padding="16">
+                                    <Border x:Name="CoverOverlay"
+                                            Grid.Row="1"
+                                            IsVisible="False"
+                                            StrokeShape="RoundRectangle 14"
+                                            BackgroundColor="#AA000000"
+                                            Stroke="Transparent"
+                                            Padding="12,8">
+                                        <VerticalStackLayout Spacing="2">
+                                            <Label x:Name="TitleLabel"
+                                                   Text="未加载音频"
+                                                   TextColor="White"
+                                                   FontSize="20"
+                                                   FontAttributes="Bold"
+                                                   LineBreakMode="TailTruncation"/>
+                                            <Label x:Name="TimeLabel"
+                                                   Text="00:00 / 00:00"
+                                                   TextColor="#B0B8C8"
+                                                   FontSize="12"/>
+                                        </VerticalStackLayout>
+                                    </Border>
+                                </Grid>
+                            </Grid>
+                        </Border>
 
-            <!-- 时间信息 -->
-            <Label Text="00:00 / 30:00" 
-                   TextColor="#A0A5B3"
-                   FontSize="14"
-                   HorizontalTextAlignment="Center"/>
-        </StackLayout>
+                        <Grid ColumnDefinitions="*,*,Auto" ColumnSpacing="10">
+                            <Button Grid.Column="0"
+                                    x:Name="ImportAudioButton"
+                                    Text="导入音频"
+                                    Clicked="OnImportAudioClicked"
+                                    BackgroundColor="#005FB8"
+                                    TextColor="White"
+                                    CornerRadius="4"
+                                    HeightRequest="36"/>
+                            <Button Grid.Column="1"
+                                    x:Name="ImportSubtitleButton"
+                                    Text="导入字幕"
+                                    Clicked="OnImportSubtitleClicked"
+                                    BackgroundColor="#2D2D2D"
+                                    TextColor="White"
+                                    CornerRadius="4"
+                                    BorderWidth="1"
+                                    BorderColor="#3D3D3D"
+                                    HeightRequest="36"/>
+                            <Button Grid.Column="2"
+                                    x:Name="FavoriteButton"
+                                    Text="☆"
+                                    Clicked="OnToggleFavoriteClicked"
+                                    BackgroundColor="Transparent"
+                                    TextColor="#FACC15"
+                                    FontSize="20"
+                                    WidthRequest="40"
+                                    HeightRequest="40"
+                                    Padding="0"/>
+                        </Grid>
+                    </VerticalStackLayout>
+                </Border>
 
-        <!-- 字幕区域 -->
-        <Frame Grid.Row="1"
-               CornerRadius="15"
-               HasShadow="True"
-               BorderColor="#242A45"
-               BackgroundColor="#242A45"
-               Margin="15"
-               Padding="10">
-            <StackLayout Spacing="5">
-                <Label Text="English Text" 
-                       TextColor="#E8E9ED"
-                       FontSize="16"
-                       FontAttributes="Bold"
-                       LineBreakMode="WordWrap"/>
-                <Label Text="中文翻译文本" 
-                       TextColor="#A0A5B3"
-                       FontSize="14"
-                       LineBreakMode="WordWrap"/>
-            </StackLayout>
-        </Frame>
+                <VerticalStackLayout x:Name="SubtitleAndControlsPanel"
+                                     Grid.Row="0"
+                                     Grid.Column="1"
+                                     Spacing="20">
+                    <Border x:Name="SubtitleDisplayBorder"
+                            StrokeShape="RoundRectangle 28"
+                            Stroke="#22FFFFFF"
+                            BackgroundColor="#17181C"
+                            Padding="28"
+                            MinimumHeightRequest="240">
+                        <Grid x:Name="SubtitleInnerGrid"
+                              ColumnSpacing="20"
+                              IsClippedToBounds="False">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="220"/>
+                            </Grid.ColumnDefinitions>
 
-        <!-- 播放控制栏 -->
-        <StackLayout Grid.Row="2" 
-                    Spacing="15"
-                    Padding="20"
-                    BackgroundColor="#1A1F3A">
+                            <VerticalStackLayout x:Name="SubtitleWordsColumn"
+                                                 Grid.Column="0" Spacing="14"
+                                                 IsClippedToBounds="False">
+                                <Label Text="正在播放"
+                                       TextColor="#6B7280"
+                                       FontSize="11"
+                                       FontAttributes="Bold"/>
 
-            <!-- 进度条 -->
-            <Slider Value="0" 
-                   Maximum="100"
-                   BackgroundColor="{StaticResource CardBackground}"
-                   ThumbColor="{StaticResource Primary}"
-                   MinimumTrackColor="{StaticResource Primary}"
-                   Margin="0"/>
+                                <FlexLayout x:Name="SubtitleWordsLayout"
+                                            Wrap="Wrap"
+                                            JustifyContent="Start"
+                                            AlignItems="Center"
+                                            Direction="Row"
+                                            IsClippedToBounds="False"/>
+                            </VerticalStackLayout>
 
-            <!-- 控制按钮 -->
-            <Grid ColumnDefinitions="*,*,*,*,*" ColumnSpacing="10">
-                <Button Grid.Column="0" 
-                       Text="🔀" 
-                       TextColor="{StaticResource TextPrimary}"
-                       BackgroundColor="Transparent"
-                       FontSize="18"/>
+                            <VerticalStackLayout x:Name="TranslationColumn"
+                                                 Grid.Column="1"
+                                                 Spacing="10"
+                                                 HorizontalOptions="Fill"
+                                                 VerticalOptions="Center">
+                                <Label Text="句子翻译"
+                                       TextColor="#6B7280"
+                                       FontSize="11"
+                                       FontAttributes="Bold"/>
+                                <Label x:Name="ChineseTextLabel"
+                                       Text="_中文翻译_"
+                                       TextColor="#CBD5E1"
+                                       FontSize="16"
+                                       LineBreakMode="WordWrap"/>
 
-                <Button Grid.Column="1" 
-                       Text="⏮" 
-                       TextColor="{StaticResource TextPrimary}"
-                       BackgroundColor="Transparent"
-                       FontSize="18"/>
+                                <Label Text="单词翻译"
+                                       TextColor="#6B7280"
+                                       FontSize="11"
+                                       FontAttributes="Bold"/>
+                                <Label x:Name="WordTranslationLabel"
+                                       Text=""
+                                       TextColor="#93C5FD"
+                                       FontSize="14"
+                                       LineBreakMode="WordWrap"/>
 
-                <Button Grid.Column="2" 
-                       Text="⏯" 
-                       TextColor="{StaticResource Secondary}"
-                       BackgroundColor="{StaticResource Primary}"
-                       FontSize="18"
-                       Padding="20"/>
+                                <Label Text="标记生词"
+                                       TextColor="#6B7280"
+                                       FontSize="11"
+                                       FontAttributes="Bold"/>
+                                <Label x:Name="MarkedVocabLabel"
+                                       Text=""
+                                       TextColor="#FACC15"
+                                       FontSize="14"
+                                       FontAttributes="Bold"
+                                       LineBreakMode="WordWrap"/>
+                            </VerticalStackLayout>
+                        </Grid>
+                    </Border>
 
-                <Button Grid.Column="3" 
-                       Text="⏭" 
-                       TextColor="{StaticResource TextPrimary}"
-                       BackgroundColor="Transparent"
-                       FontSize="18"/>
+                    <Border x:Name="PlaybackControlsBorder"
+                            StrokeShape="RoundRectangle 28"
+                            Stroke="#22FFFFFF"
+                            BackgroundColor="#17181C"
+                            Padding="24">
+                        <VerticalStackLayout Spacing="16">
+                            <Slider x:Name="ProgressSlider"
+                                    Value="0"
+                                    Maximum="100"
+                                    MinimumTrackColor="#2D7DFF"
+                                    MaximumTrackColor="#2A2D35"
+                                    ThumbColor="White"
+                                    DragStarted="OnProgressSliderDragStarted"
+                                    DragCompleted="OnProgressSliderDragCompleted"
+                                    ValueChanged="OnProgressSliderValueChanged"/>
 
-                <Button Grid.Column="4" 
-                       Text="🔁" 
-                       TextColor="{StaticResource TextPrimary}"
-                       BackgroundColor="Transparent"
-                       FontSize="18"/>
+                            <HorizontalStackLayout HorizontalOptions="Center" Spacing="24" VerticalOptions="Center">
+                                <Border StrokeShape="RoundRectangle 22"
+                                        BackgroundColor="#22252B"
+                                        Stroke="Transparent"
+                                        WidthRequest="44"
+                                        HeightRequest="44"
+                                        Padding="0">
+                                    <Label Text="I◁"
+                                           FontSize="18"
+                                           HorizontalOptions="Center"
+                                           VerticalOptions="Center"
+                                           TextColor="White">
+                                        <Label.GestureRecognizers>
+                                            <TapGestureRecognizer Tapped="OnPreviousClicked"/>
+                                        </Label.GestureRecognizers>
+                                    </Label>
+                                </Border>
+
+                                <Border x:Name="PlayPauseButton"
+                                        StrokeShape="RoundRectangle 30"
+                                        BackgroundColor="Transparent"
+                                        Stroke="White"
+                                        StrokeThickness="3"
+                                        WidthRequest="60"
+                                        HeightRequest="60"
+                                        Padding="0">
+                                    <Border.GestureRecognizers>
+                                        <TapGestureRecognizer Tapped="OnPlayPauseClicked"/>
+                                    </Border.GestureRecognizers>
+                                    <Grid>
+                                        <Label x:Name="PlayPauseLabel"
+                                               Text="▶"
+                                               FontSize="24"
+                                               HorizontalOptions="Center"
+                                               VerticalOptions="Center"
+                                               TextColor="White"
+                                               InputTransparent="True"/>
+                                    </Grid>
+                                </Border>
+
+                                <Border StrokeShape="RoundRectangle 22"
+                                        BackgroundColor="#22252B"
+                                        Stroke="Transparent"
+                                        WidthRequest="44"
+                                        HeightRequest="44"
+                                        Padding="0">
+                                    <Label Text="▷I"
+                                           FontSize="18"
+                                           HorizontalOptions="Center"
+                                           VerticalOptions="Center"
+                                           TextColor="White">
+                                        <Label.GestureRecognizers>
+                                            <TapGestureRecognizer Tapped="OnNextClicked"/>
+                                        </Label.GestureRecognizers>
+                                    </Label>
+                                </Border>
+                            </HorizontalStackLayout>
+
+                            <HorizontalStackLayout x:Name="PlaybackRateButtons"
+                                                   Spacing="8"
+                                                   HorizontalOptions="Center">
+                                <Button Text="0.5x" TextColor="#9CA3AF" BackgroundColor="#1A1D24" CornerRadius="14" Padding="14,8" Clicked="OnPlaybackRateClicked" ClassId="0.5" FontSize="12"/>
+                                <Button x:Name="Rate1Button" Text="1.0x" TextColor="White" BackgroundColor="#2D7DFF" CornerRadius="14" Padding="14,8" Clicked="OnPlaybackRateClicked" ClassId="1.0" FontSize="12"/>
+                                <Button Text="1.5x" TextColor="#9CA3AF" BackgroundColor="#1A1D24" CornerRadius="14" Padding="14,8" Clicked="OnPlaybackRateClicked" ClassId="1.5" FontSize="12"/>
+                                <Button Text="2.0x" TextColor="#9CA3AF" BackgroundColor="#1A1D24" CornerRadius="14" Padding="14,8" Clicked="OnPlaybackRateClicked" ClassId="2.0" FontSize="12"/>
+                            </HorizontalStackLayout>
+
+                            <!-- 自定义倍速拖条 -->
+                            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8" VerticalOptions="Center">
+                                <Slider Grid.Column="0"
+                                        x:Name="CustomSpeedSlider"
+                                        Minimum="0.5" Maximum="3.0" Value="1.0"
+                                        MinimumTrackColor="#2D7DFF"
+                                        MaximumTrackColor="#2A2D35"
+                                        ThumbColor="White"
+                                        DragCompleted="OnCustomSpeedDragCompleted"
+                                        ValueChanged="OnCustomSpeedSliderValueChanged"/>
+                                <Label Grid.Column="1"
+                                       x:Name="CustomSpeedLabel"
+                                       Text="1.00x"
+                                       TextColor="#9CA3AF"
+                                       FontSize="12"
+                                       WidthRequest="44"
+                                       VerticalTextAlignment="Center"
+                                       HorizontalTextAlignment="End"/>
+                            </Grid>
+                        </VerticalStackLayout>
+                    </Border>
+                </VerticalStackLayout>
             </Grid>
 
-            <!-- 倍速 -->
-            <StackLayout Orientation="Horizontal" Spacing="5" HorizontalOptions="Center">
-                <Button Text="0.5x" 
-                       TextColor="{StaticResource TextSecondary}"
-                       BackgroundColor="Transparent"
-                       Padding="10"/>
-                <Button Text="1.0x" 
-                       TextColor="{StaticResource Secondary}"
-                       BackgroundColor="{StaticResource Primary}"
-                       Padding="10"/>
-                <Button Text="1.5x" 
-                       TextColor="{StaticResource TextSecondary}"
-                       BackgroundColor="Transparent"
-                       Padding="10"/>
-                <Button Text="2.0x" 
-                       TextColor="{StaticResource TextSecondary}"
-                       BackgroundColor="Transparent"
-                       Padding="10"/>
-            </StackLayout>
-        </StackLayout>
+            <Grid x:Name="BottomSectionGrid"
+                  Grid.Row="1"
+                  ColumnSpacing="20"
+                  RowSpacing="20">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="360"/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
 
+                <Border x:Name="SubtitlesPanel"
+                        Grid.Row="0"
+                        Grid.Column="0"
+                        StrokeShape="RoundRectangle 24"
+                        Stroke="#22FFFFFF"
+                        BackgroundColor="#17181C"
+                        Padding="18">
+                    <VerticalStackLayout Spacing="8">
+                        <Grid ColumnDefinitions="Auto,*,Auto" Margin="0,0,0,8">
+                            <Label Grid.Column="0"
+                                   Text="字幕"
+                                   TextColor="White"
+                                   FontSize="15"
+                                   FontAttributes="Bold"
+                                   VerticalTextAlignment="Center"/>
+                            <HorizontalStackLayout Grid.Column="2" Spacing="6" VerticalOptions="Center">
+                                <CheckBox x:Name="AutoScrollCheckBox"
+                                          IsChecked="True"
+                                          Color="#2D7DFF"
+                                          CheckedChanged="OnAutoScrollChanged"
+                                          Scale="0.85"/>
+                                <Label Text="自动滚动"
+                                       TextColor="#6B7280"
+                                       FontSize="12"
+                                       VerticalTextAlignment="Center"/>
+                            </HorizontalStackLayout>
+                        </Grid>
+                        <ScrollView x:Name="LyricsScrollView"
+                                    HeightRequest="380"
+                                    VerticalScrollBarVisibility="Always"
+                                    Scrolled="OnLyricsScrolled">
+                        <VerticalStackLayout x:Name="LyricsStackLayout"
+                                            Spacing="6">
+                            <BindableLayout.ItemTemplate>
+                                <DataTemplate>
+                                    <Border StrokeShape="RoundRectangle 14"
+                                            Stroke="{Binding BackgroundColor}"
+                                            BackgroundColor="{Binding BackgroundColor}"
+                                            StrokeThickness="0"
+                                            Padding="10,10">
+                                        <Grid ColumnDefinitions="58,*,200" ColumnSpacing="12">
+                                            <Label Grid.Column="0"
+                                                   Text="{Binding TimeText}"
+                                                   TextColor="#6B7280"
+                                                   FontSize="11"
+                                                   VerticalTextAlignment="Start"/>
+                                            <Label Grid.Column="1"
+                                                   Text="{Binding EnglishText}"
+                                                   TextColor="{Binding TextColor}"
+                                                   FontSize="13"
+                                                   FontAttributes="{Binding FontAttr}"
+                                                   LineBreakMode="WordWrap"/>
+                                            <VerticalStackLayout Grid.Column="2" Spacing="4">
+                                                <Label Text="{Binding ChinesePlaceholder}"
+                                                       TextColor="#94A3B8"
+                                                       FontSize="12"
+                                                       LineBreakMode="WordWrap"/>
+                                                <Label Text="{Binding MarkedWordsText}"
+                                                       TextColor="{Binding MarkedWordsColor}"
+                                                       FontSize="11"
+                                                       LineBreakMode="WordWrap"/>
+                                            </VerticalStackLayout>
+                                        </Grid>
+                                        <Border.GestureRecognizers>
+                                            <TapGestureRecognizer Tapped="OnLyricLineTapped"
+                                                                  CommandParameter="{Binding .}"/>
+                                        </Border.GestureRecognizers>
+                                    </Border>
+                                </DataTemplate>
+                            </BindableLayout.ItemTemplate>
+                        </VerticalStackLayout>
+                        </ScrollView>
+                    </VerticalStackLayout>
+                </Border>
+
+                <Border x:Name="VocabularyPanel"
+                        Grid.Row="0"
+                        Grid.Column="1"
+                        StrokeShape="RoundRectangle 24"
+                        Stroke="#22FFFFFF"
+                        BackgroundColor="#17181C"
+                        Padding="18">
+                    <Grid RowDefinitions="Auto,Auto,Auto,Auto" RowSpacing="12">
+                        <!-- 生词本 -->
+                        <Label Grid.Row="0"
+                               Text="生词本"
+                               TextColor="White"
+                               FontSize="15"
+                               FontAttributes="Bold"/>
+                        <CollectionView x:Name="MarkedWordsCollectionView"
+                                        Grid.Row="1"
+                                        SelectionMode="Single"
+                                        SelectionChanged="OnMarkedWordSelected"
+                                        HeightRequest="180">
+                            <CollectionView.ItemsLayout>
+                                <LinearItemsLayout Orientation="Vertical" ItemSpacing="6"/>
+                            </CollectionView.ItemsLayout>
+                            <CollectionView.ItemTemplate>
+                                <DataTemplate>
+                                    <Border StrokeShape="RoundRectangle 12"
+                                            BackgroundColor="#1F2128"
+                                            Stroke="#2FFFFFFF"
+                                            Padding="12,10">
+                                        <VerticalStackLayout Spacing="4">
+                                            <Label Text="{Binding Word}"
+                                                   TextColor="{Binding Color}"
+                                                   FontSize="14"
+                                                   FontAttributes="Bold"/>
+                                            <Label Text="{Binding Translation}"
+                                                   TextColor="#93C5FD"
+                                                   FontSize="12"/>
+                                            <Label Text="{Binding Source}"
+                                                   TextColor="#6B7280"
+                                                   FontSize="11"/>
+                                        </VerticalStackLayout>
+                                    </Border>
+                                </DataTemplate>
+                            </CollectionView.ItemTemplate>
+                            <CollectionView.EmptyView>
+                                <VerticalStackLayout Padding="10" HorizontalOptions="Center" VerticalOptions="Center">
+                                    <Label Text="点击字幕中的单词添加到生词本"
+                                           TextColor="#6B7280"
+                                           FontSize="13"
+                                           HorizontalTextAlignment="Center"/>
+                                </VerticalStackLayout>
+                            </CollectionView.EmptyView>
+                        </CollectionView>
+
+                        <!-- 已掌握 -->
+                        <Label Grid.Row="2"
+                               Text="已掌握"
+                               TextColor="#10B981"
+                               FontSize="14"
+                               FontAttributes="Bold"
+                               Margin="0,4,0,0"/>
+                        <CollectionView x:Name="MasteredWordsCollectionView"
+                                        Grid.Row="3"
+                                        SelectionMode="Single"
+                                        SelectionChanged="OnMasteredWordSelected"
+                                        HeightRequest="150">
+                            <CollectionView.ItemsLayout>
+                                <LinearItemsLayout Orientation="Vertical" ItemSpacing="6"/>
+                            </CollectionView.ItemsLayout>
+                            <CollectionView.ItemTemplate>
+                                <DataTemplate>
+                                    <Border StrokeShape="RoundRectangle 12"
+                                            BackgroundColor="#1A2A1F"
+                                            Stroke="#22FFFFFF"
+                                            Padding="12,10">
+                                        <HorizontalStackLayout Spacing="8">
+                                            <Label Text="✓"
+                                                   TextColor="#10B981"
+                                                   FontSize="12"
+                                                   VerticalTextAlignment="Center"/>
+                                            <Label Text="{Binding Word}"
+                                                   TextColor="{Binding Color}"
+                                                   FontSize="13"
+                                                   VerticalTextAlignment="Center"/>
+                                        </HorizontalStackLayout>
+                                    </Border>
+                                </DataTemplate>
+                            </CollectionView.ItemTemplate>
+                            <CollectionView.EmptyView>
+                                <VerticalStackLayout Padding="10" HorizontalOptions="Center" VerticalOptions="Center">
+                                    <Label Text="将学过的单词标记为已掌握"
+                                           TextColor="#6B7280"
+                                           FontSize="12"
+                                           HorizontalTextAlignment="Center"/>
+                                </VerticalStackLayout>
+                            </CollectionView.EmptyView>
+                        </CollectionView>
+                    </Grid>
+                </Border>
+            </Grid>
+        </Grid>
+        </ScrollView>
     </Grid>
-
 </ContentPage>

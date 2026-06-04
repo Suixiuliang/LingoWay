@@ -5,64 +5,171 @@ using System.Xml.Linq;
 using LingoWay.Domain.Models;
 
 /// <summary>
-/// RSS解析器
+/// RSS Feed 元数据
+/// </summary>
+public record RssFeedInfo
+{
+    public string Title { get; init; } = "";
+    public string Description { get; init; } = "";
+    public string Author { get; init; } = "";
+    public string CoverUrl { get; init; } = "";
+    public string Language { get; init; } = "en";
+    public string Category { get; init; } = "";
+}
+
+/// <summary>
+/// RSS解析器 — 完整支持 RSS 2.0 + iTunes 命名空间
 /// </summary>
 public class RssParser
 {
-    public async Task<List<Episode>> ParseAsync(string rssUrl)
+    private static readonly XNamespace ITunes = "http://www.itunes.com/dtds/podcast-1.0.dtd";
+
+    public async Task<(RssFeedInfo FeedInfo, List<Episode> Episodes)> ParseAsync(string rssUrl)
     {
+        var feedInfo = new RssFeedInfo();
+        var episodes = new List<Episode>();
+
         try
         {
             using var client = new HttpClient { Timeout = TimeSpan.FromSeconds(30) };
+            client.DefaultRequestHeaders.UserAgent.ParseAdd("LingoWay/1.0");
             var content = await client.GetStringAsync(rssUrl);
 
             var doc = XDocument.Parse(content);
-            var items = doc.Descendants("item");
+            var channel = doc.Element("rss")?.Element("channel");
 
-            var episodes = new List<Episode>();
-            foreach (var item in items)
+            if (channel == null)
+                return (feedInfo, episodes);
+
+            // --- 频道级元数据 ---
+            feedInfo = new RssFeedInfo
             {
-                var episode = new Episode
-                {
-                    Title = item.Element("title")?.Value ?? "",
-                    Description = item.Element("description")?.Value ?? "",
-                    SourceUrl = item.Element("link")?.Value ?? "",
-                    PublishedDate = ParseDate(item.Element("pubDate")?.Value),
-                    CoverUrl = item.Element("image")?.Element("url")?.Value ?? "",
-                };
+                Title = channel.Element("title")?.Value ?? "",
+                Description = StripHtml(channel.Element("description")?.Value ?? ""),
+                Author = channel.Element(ITunes + "author")?.Value
+                      ?? channel.Element(ITunes + "owner")?.Element(ITunes + "name")?.Value
+                      ?? "",
+                Language = channel.Element("language")?.Value ?? "en",
+                Category = channel.Element(ITunes + "category")?.Attribute("text")?.Value
+                        ?? channel.Element("category")?.Value ?? "",
+                CoverUrl = channel.Element(ITunes + "image")?.Attribute("href")?.Value
+                        ?? channel.Element("image")?.Element("url")?.Value ?? ""
+            };
 
-                // 尝试获取音频URL
-                var enclosure = item.Element("enclosure");
-                if (enclosure != null && enclosure.Attribute("type")?.Value?.StartsWith("audio/") == true)
-                {
-                    episode.AudioUrl = enclosure.Attribute("url")?.Value ?? "";
-                    if (long.TryParse(enclosure.Attribute("length")?.Value, out var length))
-                    {
-                        episode.Duration = TimeSpan.FromSeconds(length / 128000.0); // 粗略估计
-                    }
-                }
-
-                episodes.Add(episode);
+            // --- 频道级封面回退到第一个剧集的封面 ---
+            if (string.IsNullOrEmpty(feedInfo.CoverUrl))
+            {
+                var firstItemImage = channel.Elements("item").FirstOrDefault()
+                    ?.Element(ITunes + "image")?.Attribute("href")?.Value;
+                if (!string.IsNullOrEmpty(firstItemImage))
+                    feedInfo = feedInfo with { CoverUrl = firstItemImage };
             }
 
-            return episodes;
+            // --- 剧集列表 ---
+            foreach (var item in channel.Elements("item"))
+            {
+                var episode = ParseEpisode(item);
+                if (episode != null)
+                    episodes.Add(episode);
+            }
+
+            return (feedInfo, episodes);
         }
         catch (Exception ex)
         {
-            System.Diagnostics.Debug.WriteLine($"RSS解析失败: {ex.Message}");
-            return [];
+            System.Diagnostics.Debug.WriteLine($"RSS解析失败 [{rssUrl}]: {ex.Message}");
+            return (feedInfo, episodes);
         }
+    }
+
+    private Episode? ParseEpisode(XElement item)
+    {
+        try
+        {
+            var audioUrl = "";
+            var duration = TimeSpan.Zero;
+
+            // 优先 enclosure，其次 media:content
+            var enclosure = item.Element("enclosure");
+            if (enclosure != null && enclosure.Attribute("type")?.Value?.StartsWith("audio/") == true)
+            {
+                audioUrl = enclosure.Attribute("url")?.Value ?? "";
+            }
+
+            // iTunes duration
+            var itunesDuration = item.Element(ITunes + "duration")?.Value;
+            if (!string.IsNullOrEmpty(itunesDuration))
+            {
+                if (int.TryParse(itunesDuration, out var secs))
+                    duration = TimeSpan.FromSeconds(secs);
+                else if (TimeSpan.TryParse(itunesDuration, out var ts))
+                    duration = ts;
+            }
+
+            if (string.IsNullOrEmpty(audioUrl))
+            {
+                // 尝试从 media:content 或其他位置获取
+                var mediaContent = item.Descendants()
+                    .FirstOrDefault(e => e.Name.LocalName == "content" && e.Attribute("type")?.Value?.StartsWith("audio/") == true);
+                audioUrl = mediaContent?.Attribute("url")?.Value ?? "";
+            }
+
+            if (string.IsNullOrEmpty(audioUrl))
+                return null; // 跳过没有音频的条目
+
+            var pubDate = item.Element("pubDate")?.Value ?? "";
+            var coverUrl = item.Element(ITunes + "image")?.Attribute("href")?.Value
+                        ?? item.Element("image")?.Element("url")?.Value ?? "";
+
+            return new Episode
+            {
+                Id = GenerateEpisodeId(item),
+                Title = item.Element("title")?.Value ?? "Untitled",
+                Description = StripHtml(item.Element("description")?.Value ?? ""),
+                SourceUrl = item.Element("link")?.Value ?? "",
+                PublishedDate = ParseDate(pubDate),
+                Duration = duration,
+                CoverUrl = coverUrl,
+                AudioUrl = audioUrl
+            };
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"解析剧集失败: {ex.Message}");
+            return null;
+        }
+    }
+
+    /// <summary>
+    /// 基于 enclosure URL 或 guid 生成稳定的 EpisodeId
+    /// </summary>
+    private static string GenerateEpisodeId(XElement item)
+    {
+        var enclosure = item.Element("enclosure")?.Attribute("url")?.Value;
+        var guid = item.Element("guid")?.Value;
+        var link = item.Element("link")?.Value;
+        var raw = enclosure ?? guid ?? link ?? item.ToString();
+
+        // 简单 hash 作为 ID
+        var hash = System.Security.Cryptography.SHA256.HashData(
+            System.Text.Encoding.UTF8.GetBytes(raw));
+        return Convert.ToHexStringLower(hash)[..24];
     }
 
     private static DateTime ParseDate(string? dateStr)
     {
-        if (string.IsNullOrEmpty(dateStr))
-            return DateTime.UtcNow;
-
-        if (DateTime.TryParse(dateStr, out var date))
+        if (string.IsNullOrEmpty(dateStr)) return DateTime.UtcNow;
+        if (DateTime.TryParse(dateStr, null,
+            System.Globalization.DateTimeStyles.AssumeUniversal |
+            System.Globalization.DateTimeStyles.AdjustToUniversal, out var date))
             return date;
-
         return DateTime.UtcNow;
+    }
+
+    private static string StripHtml(string html)
+    {
+        if (string.IsNullOrEmpty(html)) return "";
+        return System.Text.RegularExpressions.Regex.Replace(html, "<[^>]+>", "").Trim();
     }
 }
 
@@ -76,8 +183,8 @@ public class ContentClient
 
     public ContentClient()
     {
-        httpClient = new HttpClient 
-        { 
+        httpClient = new HttpClient
+        {
             Timeout = TimeSpan.FromSeconds(30)
         };
         rssParser = new RssParser();
@@ -87,6 +194,15 @@ public class ContentClient
     /// 从RSS源获取剧集
     /// </summary>
     public async Task<List<Episode>> GetEpisodesFromRssAsync(string rssUrl)
+    {
+        var (_, episodes) = await rssParser.ParseAsync(rssUrl);
+        return episodes;
+    }
+
+    /// <summary>
+    /// 从RSS源获取频道信息+剧集
+    /// </summary>
+    public async Task<(RssFeedInfo FeedInfo, List<Episode> Episodes)> GetFeedWithEpisodesAsync(string rssUrl)
     {
         return await rssParser.ParseAsync(rssUrl);
     }

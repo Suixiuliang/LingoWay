@@ -46,9 +46,11 @@ public class Episode
 
     // 导航属性
     public virtual ICollection<Subtitle> Subtitles { get; set; } = [];
+    public virtual ICollection<LrcLine> LrcLines { get; set; } = [];
     public virtual ICollection<Download> Downloads { get; set; } = [];
     public virtual ICollection<LearningRecord> LearningRecords { get; set; } = [];
     public virtual ICollection<Favorite> Favorites { get; set; } = [];
+    public virtual ICollection<PlaybackState> PlaybackStates { get; set; } = [];
 }
 
 /// <summary>
@@ -218,6 +220,71 @@ public class UserSettings
     public bool IsCrashReportingEnabled { get; set; } = true;
 
     public DateTime LastUpdatedDate { get; set; } = DateTime.UtcNow;
+}
+
+/// <summary>
+/// LRC 字幕条目 - 用于解析和显示 LRC 格式字幕
+/// </summary>
+public class LrcLine
+{
+    public int Id { get; set; }
+
+    public string EpisodeId { get; set; } = "";
+    public virtual Episode? Episode { get; set; }
+
+    // 时间相关
+    public TimeSpan StartTime { get; set; }
+    public TimeSpan? EndTime { get; set; }  // 可选，用于计算下一行的结束时间
+
+    // 内容
+    public string EnglishText { get; set; } = "";
+    public string ChineseText { get; set; } = "";
+
+    // 单词分解
+    public virtual ICollection<LrcWord> Words { get; set; } = [];
+
+    public int LineNumber { get; set; }  // 在解析后歌词中的行号
+}
+
+/// <summary>
+/// LRC 行中的单词
+/// </summary>
+public class LrcWord
+{
+    public int Id { get; set; }
+
+    public int LrcLineId { get; set; }
+    public virtual LrcLine? LrcLine { get; set; }
+
+    public string Word { get; set; } = "";
+    public int PositionInLine { get; set; }  // 单词在行中的位置（0-based）
+    public bool IsMarked { get; set; }
+
+    // 关联到生词本
+    public string? VocabularyWord { get; set; }
+    public virtual Vocabulary? Vocabulary { get; set; }
+}
+
+/// <summary>
+/// 播放状态
+/// </summary>
+public class PlaybackState
+{
+    public string Id { get; set; } = Guid.NewGuid().ToString();
+
+    public string EpisodeId { get; set; } = "";
+    public virtual Episode? Episode { get; set; }
+
+    // 当前播放位置
+    public TimeSpan CurrentPosition { get; set; } = TimeSpan.Zero;
+
+    // 当前高亮的 LRC 行
+    public int? CurrentLrcLineId { get; set; }
+
+    // 当前高亮的单词
+    public int? CurrentHighlightedWordId { get; set; }
+
+    public DateTime LastUpdatedTime { get; set; } = DateTime.UtcNow;
 }
 
 // ============ Enums ============

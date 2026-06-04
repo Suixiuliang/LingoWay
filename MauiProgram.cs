@@ -8,6 +8,7 @@ using LingoWay.Application.Services;
 using LingoWay.Presentation.ViewModels;
 using LingoWay.Views;
 using Microsoft.EntityFrameworkCore;
+using Sharpnado.MaterialFrame;
 
 namespace LingoWay
 {
@@ -18,6 +19,7 @@ namespace LingoWay
             var builder = MauiApp.CreateBuilder();
             builder
                 .UseMauiApp<App>()
+                .UseSharpnadoMaterialFrame(loggerEnable: false)
                 .ConfigureFonts(fonts =>
                 {
                     fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
@@ -45,6 +47,23 @@ namespace LingoWay
                 .AddSingleton<IFavoriteService, FavoriteService>()
                 .AddSingleton<ILearningService, LearningService>()
 
+                // 音频播放和字幕解析服务
+                .AddSingleton<LrcParserService>()
+                .AddSingleton<IAudioPlaybackService>(sp =>
+                {
+#if WINDOWS
+                    return new LingoWay.Application.Services.Windows.WindowsAudioPlaybackService();
+#elif ANDROID
+                    return new LingoWay.Application.Services.Android.AndroidAudioPlaybackService();
+#elif IOS
+                    return new LingoWay.Application.Services.iOS.iOSAudioPlaybackService();
+#elif MACCATALYST
+                    return new LingoWay.Application.Services.MacCatalyst.MacCatalystAudioPlaybackService();
+#else
+                    return new DefaultAudioPlaybackService();
+#endif
+                })
+
                 // ViewModels
                 .AddSingleton<PlayerViewModel>()
                 .AddSingleton<BrowseViewModel>()
@@ -52,6 +71,7 @@ namespace LingoWay
                 .AddSingleton<FavoriteViewModel>()
                 .AddSingleton<SearchViewModel>()
                 .AddSingleton<SettingsViewModel>()
+                .AddSingleton<VocabularyViewModel>()
 
                 // Pages
                 .AddSingleton<MainPage>()
@@ -59,7 +79,8 @@ namespace LingoWay
                 .AddSingleton<BrowsePage>()
                 .AddSingleton<DownloadsPage>()
                 .AddSingleton<FavoritesPage>()
-                .AddSingleton<SettingsPage>();
+                .AddSingleton<SettingsPage>()
+                .AddSingleton<VocabularyPage>();
 
             // Theme service
             builder.Services.AddSingleton<IThemeService, ThemeService>();

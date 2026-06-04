@@ -78,25 +78,87 @@ public class ContentProvider : IContentProvider
 
     public async Task AddCustomPodcastAsync(string rssUrl)
     {
-        try
+        var (feedInfo, episodes) = await httpClient.GetFeedWithEpisodesAsync(rssUrl);
+
+        if (episodes.Count == 0)
+            throw new InvalidOperationException("该 RSS 源没有可播放的音频剧集");
+
+        // 检查是否已订阅
+        var existing = await podcastRepo.GetAllAsync();
+        if (existing.Any(p => string.Equals(p.RssUrl, rssUrl, StringComparison.OrdinalIgnoreCase)))
+            throw new InvalidOperationException("该 RSS 源已经订阅过了");
+
+        var podcast = new Podcast
         {
-            var episodes = await httpClient.GetEpisodesFromRssAsync(rssUrl);
-            if (episodes.Count == 0)
-                return;
+            Title = string.IsNullOrWhiteSpace(feedInfo.Title)
+                ? new Uri(rssUrl).Host.Replace("www.", "")
+                : feedInfo.Title,
+            Description = feedInfo.Description,
+            Author = feedInfo.Author,
+            CoverUrl = feedInfo.CoverUrl,
+            Language = feedInfo.Language,
+            Category = feedInfo.Category,
+            RssUrl = rssUrl,
+            CreatedDate = DateTime.UtcNow
+        };
 
-            var podcast = new Podcast
-            {
-                Title = episodes.FirstOrDefault()?.Title ?? "Custom Podcast",
-                RssUrl = rssUrl,
-                CreatedDate = DateTime.UtcNow,
-                Episodes = episodes
-            };
+        await podcastRepo.AddAsync(podcast);
 
-            await podcastRepo.AddAsync(podcast);
+        // 关联剧集到新播客
+        foreach (var episode in episodes)
+        {
+            episode.PodcastId = podcast.Id;
+            await episodeRepo.AddAsync(episode);
         }
-        catch
+    }
+
+    public async Task DeletePodcastAsync(string podcastId)
+    {
+        var podcast = await podcastRepo.GetByIdAsync(podcastId);
+        if (podcast != null)
+            await podcastRepo.DeleteAsync(podcast);
+    }
+
+    /// <summary>
+    /// 获取内置英语播客 RSS 源列表，首次使用自动预填充
+    /// </summary>
+    public async Task SeedDefaultPodcastsAsync()
+    {
+        var existing = await podcastRepo.GetAllAsync();
+        if (existing.Count > 0) return; // 已有订阅则不覆盖
+
+        var defaults = new[]
         {
-            // 处理异常
+            (Name: "6 Minute English",    Url: "https://feeds.bbci.co.uk/programmes/p02pc9tn/episodes/downloads.rss", Cat: "Education",   Author: "BBC"),
+            (Name: "The English We Speak",Url: "https://feeds.bbci.co.uk/programmes/p02pc9zn/episodes/downloads.rss", Cat: "Language",    Author: "BBC"),
+            (Name: "All Ears English",    Url: "https://feeds.megaphone.fm/allearsenglish",                              Cat: "Education",   Author: "Lindsay & Michelle"),
+            (Name: "Luke's English Podcast",Url:"https://feeds.libsyn.com/46793/rss",                                    Cat: "Language",    Author: "Luke Thompson"),
+            (Name: "Culips ESL Podcast",  Url: "https://esl.culips.com/feed/",                                            Cat: "Education",   Author: "Culips"),
+            (Name: "RealLife English",    Url: "https://feeds.simplecast.com/54ogqHXY",                                   Cat: "Language",    Author: "RealLife"),
+            (Name: "Speak English with Tiffani", Url:"https://feeds.buzzsprout.com/858251.rss",                            Cat: "Education",   Author: "Tiffani"),
+            (Name: "English Learning for Curious Minds", Url:"https://feeds.megaphone.fm/LEONARDOENGLISH",                 Cat: "Education",   Author: "Leonardo English"),
+        };
+
+        foreach (var (name, url, cat, author) in defaults)
+        {
+            try
+            {
+                var podcast = new Podcast
+                {
+                    Title = name,
+                    RssUrl = url,
+                    Author = author,
+                    Category = cat,
+                    Language = "en",
+                    CreatedDate = DateTime.UtcNow,
+                    CoverUrl = "empty.png"
+                };
+                await podcastRepo.AddAsync(podcast);
+            }
+            catch
+            {
+                // 跳过添加失败的源
+            }
         }
     }
 }
@@ -330,7 +392,7 @@ public class VocabularyService : IVocabularyService
         return result;
     }
 
-    public async Task AddToUserVocabularyAsync(string word)
+    public async Task AddToUserVocabularyAsync(string word, string? episodeId = null, int? lrcLineId = null, int? positionInLine = null)
     {
         var existing = await userVocabRepo.GetByWordAsync(word);
         if (existing == null)
@@ -338,6 +400,32 @@ public class VocabularyService : IVocabularyService
             var userVocab = new UserVocabulary { Word = word };
             await userVocabRepo.AddAsync(userVocab);
         }
+
+        // 确保 Vocabulary 记录存在
+        var vocab = await vocabRepo.GetByWordAsync(word);
+        if (vocab == null)
+        {
+            vocab = new Vocabulary
+            {
+                Word = word,
+                CreatedDate = DateTime.UtcNow
+            };
+            await vocabRepo.AddAsync(vocab);
+        }
+    }
+
+    public async Task<HashSet<string>> GetMarkedWordsAsync(string? episodeId = null)
+    {
+        var userVocabs = await userVocabRepo.GetAllAsync();
+        return userVocabs.Select(uv => uv.Word.ToLowerInvariant()).ToHashSet();
+    }
+
+    public async Task<Dictionary<string, int>> GetUserVocabularyWithLevelsAsync()
+    {
+        var userVocabs = await userVocabRepo.GetAllAsync();
+        return userVocabs.ToDictionary(
+            uv => uv.Word.ToLowerInvariant(),
+            uv => uv.MasteryLevel);
     }
 
     public async Task RemoveFromUserVocabularyAsync(string word)

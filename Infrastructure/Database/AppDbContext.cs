@@ -19,6 +19,11 @@ public class AppDbContext : DbContext
     public DbSet<UserVocabulary> UserVocabularies { get; set; } = null!;
     public DbSet<UserSettings> UserSettings { get; set; } = null!;
 
+    // LRC 字幕相关
+    public DbSet<LrcLine> LrcLines { get; set; } = null!;
+    public DbSet<LrcWord> LrcWords { get; set; } = null!;
+    public DbSet<PlaybackState> PlaybackStates { get; set; } = null!;
+
     public AppDbContext()
     {
         // 配置DbContext选项
@@ -55,6 +60,11 @@ public class AppDbContext : DbContext
             .HasForeignKey(s => s.EpisodeId)
             .OnDelete(DeleteBehavior.Cascade);
         modelBuilder.Entity<Episode>()
+            .HasMany(e => e.LrcLines)
+            .WithOne(l => l.Episode)
+            .HasForeignKey(l => l.EpisodeId)
+            .OnDelete(DeleteBehavior.Cascade);
+        modelBuilder.Entity<Episode>()
             .HasMany(e => e.Downloads)
             .WithOne(d => d.Episode)
             .HasForeignKey(d => d.EpisodeId)
@@ -68,6 +78,11 @@ public class AppDbContext : DbContext
             .HasMany(e => e.Favorites)
             .WithOne(f => f.Episode)
             .HasForeignKey(f => f.EpisodeId)
+            .OnDelete(DeleteBehavior.Cascade);
+        modelBuilder.Entity<Episode>()
+            .HasMany(e => e.PlaybackStates)
+            .WithOne(ps => ps.Episode)
+            .HasForeignKey(ps => ps.EpisodeId)
             .OnDelete(DeleteBehavior.Cascade);
 
         // 配置Subtitle
@@ -117,11 +132,41 @@ public class AppDbContext : DbContext
         modelBuilder.Entity<UserSettings>()
             .HasKey(us => us.Id);
 
+        // 配置LrcLine
+        modelBuilder.Entity<LrcLine>()
+            .HasKey(ll => ll.Id);
+        modelBuilder.Entity<LrcLine>()
+            .HasMany(ll => ll.Words)
+            .WithOne(w => w.LrcLine)
+            .HasForeignKey(w => w.LrcLineId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        // 配置LrcWord
+        modelBuilder.Entity<LrcWord>()
+            .HasKey(w => w.Id);
+        modelBuilder.Entity<LrcWord>()
+            .HasOne(w => w.Vocabulary)
+            .WithMany()
+            .HasForeignKey(w => w.VocabularyWord)
+            .OnDelete(DeleteBehavior.SetNull);
+
+        // 配置PlaybackState
+        modelBuilder.Entity<PlaybackState>()
+            .HasKey(ps => ps.Id);
+
         // 创建索引以提高查询性能
         modelBuilder.Entity<Episode>()
             .HasIndex(e => e.PodcastId);
         modelBuilder.Entity<Episode>()
             .HasIndex(e => e.PublishedDate);
+
+        modelBuilder.Entity<LrcLine>()
+            .HasIndex(ll => ll.EpisodeId);
+        modelBuilder.Entity<LrcLine>()
+            .HasIndex(ll => ll.StartTime);
+
+        modelBuilder.Entity<PlaybackState>()
+            .HasIndex(ps => ps.EpisodeId);
 
         modelBuilder.Entity<Download>()
             .HasIndex(d => d.Status);

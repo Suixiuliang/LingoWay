@@ -3,76 +3,158 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="LingoWay.Views.BrowsePage"
              Title="发现"
-             BackgroundColor="#0A0E27">
+             BackgroundColor="{DynamicResource BackgroundPrimary}">
 
-    <Grid RowDefinitions="Auto,*" Padding="0">
+    <Grid RowDefinitions="Auto,Auto,*" Padding="0">
 
         <!-- 搜索栏 -->
-        <SearchBar x:Name="SearchBar"
-                   Grid.Row="0"
+        <SearchBar Grid.Row="0"
+                   x:Name="SearchBar"
                    Placeholder="搜索播客或剧集..."
-                   TextColor="#E8E9ED"
-                   PlaceholderColor="#6B7280"
-                   BackgroundColor="#1A1F3A"
+                   TextColor="{DynamicResource TextPrimary}"
+                   PlaceholderColor="{DynamicResource TextSecondary}"
+                   BackgroundColor="{DynamicResource BackgroundSecondary}"
                    SearchButtonPressed="OnSearchButtonPressed"
-                   Margin="10"/>
+                   TextChanged="OnSearchTextChanged"
+                   HeightRequest="40"
+                   Margin="10,2,10,0"/>
 
-        <!-- 内容列表 -->
-        <CollectionView Grid.Row="1"
-                       SelectionMode="Single"
-                       SelectionChangedCommand="{Binding SelectPodcastCommand}">
+        <!-- Tab 切换：推荐 | 我的订阅 -->
+        <Grid Grid.Row="1" ColumnDefinitions="*,*" Margin="10,8,10,0" ColumnSpacing="8">
+            <Border x:Name="TabRecommend"
+                    StrokeShape="RoundRectangle 4"
+                    BackgroundColor="#005FB8" Stroke="Transparent" Padding="0">
+                <Border.GestureRecognizers>
+                    <TapGestureRecognizer Tapped="OnTabRecommendTapped"/>
+                </Border.GestureRecognizers>
+                <Label Text="📡 推荐" TextColor="White" FontSize="14" FontAttributes="Bold"
+                       HorizontalOptions="Center" VerticalOptions="Center" Margin="0,10"/>
+            </Border>
+            <Border x:Name="TabMySubs"
+                    Grid.Column="1"
+                    StrokeShape="RoundRectangle 4"
+                    BackgroundColor="#2D2D2D" Stroke="#3D3D3D" Padding="0">
+                <Border.GestureRecognizers>
+                    <TapGestureRecognizer Tapped="OnTabMySubsTapped"/>
+                </Border.GestureRecognizers>
+                <Label Text="🎧 我的订阅" TextColor="#9CA3AF" FontSize="14"
+                       HorizontalOptions="Center" VerticalOptions="Center" Margin="0,10"/>
+            </Border>
+        </Grid>
 
-            <CollectionView.ItemsSource>
-                <x:Array Type="{x:Type x:String}">
-                    <x:String>VOA慢速英语</x:String>
-                    <x:String>BBC Learning English</x:String>
-                    <x:String>TED演讲</x:String>
-                    <x:String>英语新闻</x:String>
-                </x:Array>
-            </CollectionView.ItemsSource>
+        <!-- ============ 推荐 Tab 内容 ============ -->
+        <Grid Grid.Row="2" x:Name="RecommendPanel">
+            <CollectionView x:Name="RecommendList"
+                            SelectionMode="Single"
+                            SelectionChanged="OnPodcastSelected">
+                <CollectionView.ItemTemplate>
+                    <DataTemplate>
+                        <Frame Margin="10,4" CornerRadius="14" HasShadow="True"
+                               BorderColor="{DynamicResource CardBackground}"
+                               BackgroundColor="{DynamicResource CardBackground}" Padding="12">
+                            <Grid ColumnDefinitions="56,*" ColumnSpacing="12">
+                                <Frame Grid.Column="0" CornerRadius="10" Padding="0"
+                                       IsClippedToBounds="True" HeightRequest="56" WidthRequest="56"
+                                       BackgroundColor="Transparent" BorderColor="Transparent" HasShadow="False">
+                                    <Image Source="{Binding CoverUrl}" Aspect="AspectFill"/>
+                                </Frame>
+                                <VerticalStackLayout Grid.Column="1" Spacing="3" VerticalOptions="Center">
+                                    <Label Text="{Binding Title}" TextColor="{DynamicResource TextPrimary}"
+                                           FontSize="14" FontAttributes="Bold" MaxLines="1" LineBreakMode="TailTruncation"/>
+                                    <Label Text="{Binding Author}" TextColor="{DynamicResource TextSecondary}"
+                                           FontSize="12" MaxLines="1" LineBreakMode="TailTruncation"/>
+                                    <HorizontalStackLayout Spacing="6">
+                                        <Border StrokeShape="RoundRectangle 6" BackgroundColor="#1E3A5F"
+                                                Stroke="Transparent" Padding="6,2">
+                                            <Label Text="{Binding Language}" TextColor="#7EB8FF" FontSize="10"/>
+                                        </Border>
+                                        <Border StrokeShape="RoundRectangle 6" BackgroundColor="#1A3A2A"
+                                                Stroke="Transparent" Padding="6,2">
+                                            <Label Text="{Binding Category, TargetNullValue='英语', FallbackValue='英语'}"
+                                                   TextColor="#22C55E" FontSize="10"/>
+                                        </Border>
+                                    </HorizontalStackLayout>
+                                </VerticalStackLayout>
+                            </Grid>
+                        </Frame>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+                <CollectionView.EmptyView>
+                    <VerticalStackLayout Padding="40" Spacing="12" HorizontalOptions="Center" VerticalOptions="Center">
+                        <Label Text="📻" FontSize="48" HorizontalOptions="Center"/>
+                        <Label Text="还没有推荐内容" FontSize="16" TextColor="#9CA3AF" HorizontalOptions="Center"/>
+                    </VerticalStackLayout>
+                </CollectionView.EmptyView>
+            </CollectionView>
+        </Grid>
 
-            <CollectionView.ItemTemplate>
-                <DataTemplate>
-                    <Frame Margin="10,5" 
-                          CornerRadius="15"
-                          HasShadow="True"
-                          BorderColor="#242A45"
-                          BackgroundColor="#242A45"
-                          Padding="0">
-                        <Grid ColumnDefinitions="80,*" ColumnSpacing="10" Padding="10">
-                            <!-- 封面 -->
-                            <Frame Grid.Column="0" CornerRadius="10" Padding="0" IsClippedToBounds="True" HeightRequest="80" WidthRequest="80" BackgroundColor="Transparent">
-                                <Image Source="dotnet_bot.png" Aspect="AspectFill" />
+        <!-- ============ 我的订阅 Tab 内容 ============ -->
+        <Grid Grid.Row="2" x:Name="MySubsPanel" IsVisible="False" RowDefinitions="*,Auto" Padding="10,4">
+
+            <!-- 逐行列表 —— WMP 风格 -->
+            <CollectionView Grid.Row="0" x:Name="MySubsList"
+                            SelectionMode="Single"
+                            SelectionChanged="OnSubscribedPodcastSelected">
+                <CollectionView.ItemsLayout>
+                    <LinearItemsLayout Orientation="Vertical" ItemSpacing="6"/>
+                </CollectionView.ItemsLayout>
+                <CollectionView.ItemTemplate>
+                    <DataTemplate>
+                        <Grid ColumnDefinitions="48,*,Auto" ColumnSpacing="10"
+                              Padding="10,8" HeightRequest="120"
+                              BackgroundColor="{DynamicResource CardBackground}">
+                            <Frame Grid.Column="0" CornerRadius="8" Padding="0" IsClippedToBounds="True"
+                                   HeightRequest="90" WidthRequest="90" VerticalOptions="Center"
+                                   BackgroundColor="#1A1D25" BorderColor="Transparent" HasShadow="False">
+                                <Image Source="{Binding CoverUrl, TargetNullValue='empty.png', FallbackValue='empty.png'}"
+                                       Aspect="AspectFill"/>
                             </Frame>
-
-                            <!-- 信息 -->
-                            <StackLayout Grid.Column="1" Spacing="5">
-                                <Label Text="{Binding .}"
-                                      TextColor="#E8E9ED"
-                                      FontSize="14"
-                                      FontAttributes="Bold"/>
-                                <Label Text="高质量英语学习资源"
-                                      TextColor="#A0A5B3"
-                                      FontSize="12"/>
-                                <Label Text="💚 已订阅"
-                                      TextColor="#10B981"
-                                      FontSize="10"/>
-                            </StackLayout>
+                            <VerticalStackLayout Grid.Column="1" Spacing="2" VerticalOptions="Center">
+                                <Label Text="{Binding Title}"
+                                       TextColor="{DynamicResource TextPrimary}"
+                                       FontSize="13" FontAttributes="Bold"
+                                       MaxLines="1" LineBreakMode="TailTruncation"/>
+                                <Label Text="{Binding Author}"
+                                       TextColor="{DynamicResource TextSecondary}"
+                                       FontSize="11" MaxLines="1" LineBreakMode="TailTruncation"/>
+                            </VerticalStackLayout>
+                            <!-- 状态 / 取消按钮 -->
+                            <Border Grid.Column="2" VerticalOptions="Center"
+                                    IsVisible="{Binding HasError}"
+                                    StrokeShape="RoundRectangle 4"
+                                    BackgroundColor="#3A1A1A" Stroke="Transparent"
+                                    Padding="6,2">
+                                <Label Text="失效" TextColor="#EF4444" FontSize="9"/>
+                            </Border>
+                            <Border Grid.Column="2" VerticalOptions="Center" x:Name="UnsubBtn"
+                                    StrokeShape="RoundRectangle 4"
+                                    BackgroundColor="#2D2D2D" Stroke="#3D3D3D"
+                                    Padding="8,4">
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer Tapped="OnUnsubItemTapped"/>
+                                </Border.GestureRecognizers>
+                                <Label Text="✕" TextColor="#6B7280" FontSize="11"/>
+                            </Border>
                         </Grid>
-                    </Frame>
-                </DataTemplate>
-            </CollectionView.ItemTemplate>
-        </CollectionView>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+                <CollectionView.EmptyView>
+                    <VerticalStackLayout Padding="40" Spacing="12" HorizontalOptions="Center" VerticalOptions="Center">
+                        <Label Text="🎧" FontSize="48" HorizontalOptions="Center"/>
+                        <Label Text="还没有订阅任何播客" FontSize="16" TextColor="#9CA3AF" HorizontalOptions="Center"/>
+                    </VerticalStackLayout>
+                </CollectionView.EmptyView>
+            </CollectionView>
 
+            <!-- 底部添加按钮 -->
+            <Button Grid.Row="1"
+                    x:Name="AddRssButton"
+                    Text="+ 添加RSS源"
+                    Clicked="OnAddRssClicked"
+                    BackgroundColor="#005FB8"
+                    TextColor="White"
+                    CornerRadius="4" HeightRequest="36"
+                    Margin="0,8,0,0"/>
+        </Grid>
     </Grid>
-
-    <ContentPage.ToolbarItems>
-        <ToolbarItem Text="刷新" 
-                     Command="{Binding RefreshCommand}"
-                     Order="Primary"/>
-        <ToolbarItem Text="添加" 
-                     Command="{Binding AddCustomPodcastCommand}"
-                     Order="Primary"/>
-    </ContentPage.ToolbarItems>
-
 </ContentPage>

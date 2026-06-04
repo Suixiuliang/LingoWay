@@ -3,54 +3,27 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="LingoWay.Views.DownloadsPage"
              Title="下载"
-             BackgroundColor="#0A0E27">
+             BackgroundColor="{DynamicResource BackgroundPrimary}">
 
     <CollectionView SelectionMode="Single">
-        <CollectionView.ItemsSource>
-            <x:Array Type="{x:Type x:String}">
-                <x:String>下载的剧集 1</x:String>
-                <x:String>下载的剧集 2</x:String>
-                <x:String>下载的剧集 3</x:String>
-            </x:Array>
-        </CollectionView.ItemsSource>
-
         <CollectionView.ItemTemplate>
             <DataTemplate>
                 <Frame Margin="10,5"
                       CornerRadius="15"
                       HasShadow="True"
-                      BorderColor="#242A45"
-                      BackgroundColor="#242A45"
+                      BorderColor="{DynamicResource CardBackground}"
+                      BackgroundColor="{DynamicResource CardBackground}"
                       Padding="10">
                     <Grid ColumnDefinitions="80,*,Auto" ColumnSpacing="10">
-                        <!-- 封面 -->
                         <Frame Grid.Column="0" CornerRadius="10" Padding="0" IsClippedToBounds="True" HeightRequest="80" WidthRequest="80" BackgroundColor="Transparent">
                             <Image Source="dotnet_bot.png" Aspect="AspectFill" />
                         </Frame>
-
-                        <!-- 信息 -->
                         <StackLayout Grid.Column="1" Spacing="5">
-                            <Label Text="{Binding .}"
-                                  TextColor="#E8E9ED"
-                                  FontSize="14"
-                                  FontAttributes="Bold"/>
-                            <Label Text="30分钟"
-                                  TextColor="#A0A5B3"
-                                  FontSize="12"/>
-                            <ProgressBar Progress="1"
-                                        BackgroundColor="#242A45"
-                                        ProgressColor="#6366F1"/>
+                            <Label Text="{Binding .}" TextColor="{DynamicResource TextPrimary}" FontSize="14" FontAttributes="Bold"/>
+                            <Label Text="30分钟" TextColor="{DynamicResource TextSecondary}" FontSize="12"/>
+                            <ProgressBar Progress="1" BackgroundColor="{DynamicResource BackgroundSecondary}" ProgressColor="{DynamicResource PrimaryBrand}"/>
                         </StackLayout>
-
-                        <!-- 删除按钮 -->
-                        <Button Grid.Column="2"
-                               Text="✕"
-                               TextColor="#EF4444"
-                               BackgroundColor="Transparent"
-                               FontSize="18"
-                               WidthRequest="40"
-                               HeightRequest="40"
-                               VerticalOptions="Center"/>
+                        <Button Grid.Column="2" Text="✕" TextColor="{DynamicResource ErrorRed}" BackgroundColor="Transparent" FontSize="18" WidthRequest="40" HeightRequest="40" VerticalOptions="Center"/>
                     </Grid>
                 </Frame>
             </DataTemplate>
@@ -58,10 +31,8 @@
     </CollectionView>
 
     <ContentPage.ToolbarItems>
-        <ToolbarItem Text="下载全部" 
-                     Order="Primary"/>
-        <ToolbarItem Text="清空" 
-                     Order="Primary"/>
+        <ToolbarItem Text="下载全部" Order="Primary"/>
+        <ToolbarItem Text="清空" Order="Primary"/>
     </ContentPage.ToolbarItems>
 
 </ContentPage>

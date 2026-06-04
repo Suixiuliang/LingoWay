@@ -1,6 +1,7 @@
-namespace LingoWay.Views;
-
 using LingoWay.Presentation.ViewModels;
+using Microsoft.Maui.Controls;
+
+namespace LingoWay.Views;
 
 public partial class SettingsPage : ContentPage
 {
@@ -12,19 +13,19 @@ public partial class SettingsPage : ContentPage
 
     private void OnLightThemeClicked(object sender, EventArgs e)
     {
-        var svc = App.Current.Handler.MauiContext.Services.GetService(typeof(LingoWay.Application.Services.IThemeService)) as LingoWay.Application.Services.IThemeService;
-        svc?.SetLightTheme();
+        (Microsoft.Maui.Controls.Application.Current as App)?.LoadTheme("Light");
     }
 
     private void OnDarkThemeClicked(object sender, EventArgs e)
     {
-        var svc = App.Current.Handler.MauiContext.Services.GetService(typeof(LingoWay.Application.Services.IThemeService)) as LingoWay.Application.Services.IThemeService;
-        svc?.SetDarkTheme();
+        (Microsoft.Maui.Controls.Application.Current as App)?.LoadTheme("Dark");
     }
 
     private void OnSystemThemeClicked(object sender, EventArgs e)
     {
-        var svc = App.Current.Handler.MauiContext.Services.GetService(typeof(LingoWay.Application.Services.IThemeService)) as LingoWay.Application.Services.IThemeService;
-        svc?.SetSystemTheme();
+        // 跟随系统主题：先将 UserAppTheme 设为 Unspecified，再根据系统重新加载
+        Microsoft.Maui.Controls.Application.Current.UserAppTheme = AppTheme.Unspecified;
+        var currentTheme = Microsoft.Maui.Controls.Application.Current.RequestedTheme == AppTheme.Light ? "Light" : "Dark";
+        (Microsoft.Maui.Controls.Application.Current as App)?.LoadTheme(currentTheme);
     }
 }

@@ -1,3 +1,5 @@
+using Microsoft.Maui.Controls;
+
 namespace LingoWay.Application.Services;
 
 public interface IThemeService
@@ -11,16 +13,16 @@ public class ThemeService : IThemeService
 {
     public void SetLightTheme()
     {
-        Application.Current.UserAppTheme = AppTheme.Light;
+        global::Microsoft.Maui.Controls.Application.Current.UserAppTheme = AppTheme.Light;
     }
 
     public void SetDarkTheme()
     {
-        Application.Current.UserAppTheme = AppTheme.Dark;
+        global::Microsoft.Maui.Controls.Application.Current.UserAppTheme = AppTheme.Dark;
     }
 
     public void SetSystemTheme()
     {
-        Application.Current.UserAppTheme = AppTheme.Unspecified;
+        global::Microsoft.Maui.Controls.Application.Current.UserAppTheme = AppTheme.Unspecified;
     }
 }
