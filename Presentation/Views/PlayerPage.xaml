@@ -362,7 +362,7 @@
                                                    FontAttributes="{Binding FontAttr}"
                                                    LineBreakMode="WordWrap"/>
                                             <VerticalStackLayout Grid.Column="2" Spacing="4">
-                                                <Label Text="{Binding ChinesePlaceholder}"
+                                                <Label Text="{Binding ChineseText}"
                                                        TextColor="#94A3B8"
                                                        FontSize="12"
                                                        LineBreakMode="WordWrap"/>

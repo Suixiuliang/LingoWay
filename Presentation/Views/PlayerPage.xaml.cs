@@ -20,7 +20,12 @@ public class LyricDisplayItem : System.ComponentModel.INotifyPropertyChanged
     }
     public string TimeText => $"{(int)Line.StartTime.TotalMinutes:D2}:{Line.StartTime.Seconds:D2}";
     public string EnglishText => Line.EnglishText;
-    public string ChinesePlaceholder => "_中文翻译_";
+    public string ChineseText
+    {
+        get => _chineseText;
+        set { _chineseText = value; OnPropertyChanged(); }
+    }
+    private string _chineseText = "";
 
     private string _markedWordsText = "";
     public string MarkedWordsText
@@ -1241,6 +1246,29 @@ public partial class PlayerPage : ContentPage
                 FontAttr = "None",
                 BackgroundColor = Color.FromArgb("#B015171C")
             });
+        }
+
+        // 后台翻译所有行的中文
+        _ = TranslateAllLineChineseAsync();
+    }
+
+    /// <summary>
+    /// 后台翻译所有歌词行的中文，逐行填入 LyricDisplayItem
+    /// </summary>
+    private async Task TranslateAllLineChineseAsync()
+    {
+        foreach (var item in _lyricItems.ToList())
+        {
+            var text = item.EnglishText;
+            if (string.IsNullOrWhiteSpace(text)) continue;
+            var translation = await _translationService.TranslateSingleAsync(text);
+            if (!string.IsNullOrWhiteSpace(translation))
+            {
+                MainThread.BeginInvokeOnMainThread(() =>
+                {
+                    item.ChineseText = translation;
+                });
+            }
         }
     }
 
