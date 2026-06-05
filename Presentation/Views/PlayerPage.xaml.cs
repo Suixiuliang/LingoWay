@@ -526,7 +526,7 @@ public partial class PlayerPage : ContentPage
                 var imageBytes = picture.Data.Data;
                 CoverImage.Source = ImageSource.FromStream(() => new MemoryStream(imageBytes));
                 // 生成 90px 高斯模糊背景
-                var blurredBytes = GenerateBlurredCover(imageBytes, 90);
+                var blurredBytes = GenerateBlurredCover(imageBytes, 23);
                 if (blurredBytes != null)
                 {
                     CoverBlurImage.Source = ImageSource.FromStream(() => new MemoryStream(blurredBytes));
