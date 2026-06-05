@@ -702,12 +702,11 @@ public partial class PlayerPage : ContentPage
         await _viewModel.SeekAsync(target);
     }
 
-    private async void OnProgressSliderValueChanged(object? sender, ValueChangedEventArgs e)
+    /// <summary>Slider值变化时不做Seek，由DragCompleted统一处理seek逻辑</summary>
+    private void OnProgressSliderValueChanged(object? sender, ValueChangedEventArgs e)
     {
-        if (_isUpdatingProgressFromPlayback || _isDraggingSlider) return;
-        if (_viewModel.TotalDuration.TotalMilliseconds <= 0) return;
-        var position = TimeSpan.FromMilliseconds(e.NewValue * _viewModel.TotalDuration.TotalMilliseconds / 100d);
-        await _viewModel.SeekAsync(position);
+        // 点击/拖拽 slider 时由 DragCompleted 统一 seek
+        // 播放位置更新时 _isUpdatingProgressFromPlayback=true 跳过这里
     }
 
     private void ViewModel_LrcLinesUpdated(object? sender, EventArgs e)
