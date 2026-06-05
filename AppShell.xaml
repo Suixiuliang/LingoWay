@@ -10,28 +10,28 @@
     <!-- 标签栏导航 -->
     <TabBar>
 
-        <!-- 发现更多 -->
-        <ShellContent Title="发现更多"
+        <!-- 播客广场 -->
+        <ShellContent Title="播客广场"
                       ContentTemplate="{DataTemplate views:BrowsePage}"
                       Route="BrowsePage" />
 
-        <!-- 我的收藏 -->
-        <ShellContent Title="我的收藏"
+        <!-- 播放列表 -->
+        <ShellContent Title="播放列表"
                       ContentTemplate="{DataTemplate views:FavoritesPage}"
                       Route="FavoritesPage" />
 
-        <!-- 播放中（主页） -->
-        <ShellContent Title="播放中"
+        <!-- 正在播放（主页） -->
+        <ShellContent Title="正在播放"
                       ContentTemplate="{DataTemplate views:PlayerPage}"
                       Route="PlayerPage" />
 
-        <!-- 单词本 -->
-        <ShellContent Title="单词本"
+        <!-- 单词学习 -->
+        <ShellContent Title="单词学习"
                       ContentTemplate="{DataTemplate views:VocabularyPage}"
                       Route="VocabularyPage" />
 
-        <!-- 设置 -->
-        <ShellContent Title="设置"
+        <!-- 软件设置 -->
+        <ShellContent Title="软件设置"
                       ContentTemplate="{DataTemplate views:SettingsPage}"
                       Route="SettingsPage" />
     </TabBar>
