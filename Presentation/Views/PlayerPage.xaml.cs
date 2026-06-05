@@ -417,8 +417,8 @@ public partial class PlayerPage : ContentPage
             await _viewModel.LoadAudioAndSubtitleAsync(audioPath, null);
             TitleLabel.Text = System.IO.Path.GetFileNameWithoutExtension(audioPath);
             CoverOverlay.IsVisible = true;
-            LoadAudioCover(audioPath);
-            BlurOverlay.IsVisible = true;
+            bool hasCover = LoadAudioCover(audioPath);
+            BlurOverlay.IsVisible = hasCover;
             _audioLoaded = true;
 
             _markedWordSet = await _viewModel.GetMarkedWordsAsync();
@@ -515,7 +515,7 @@ public partial class PlayerPage : ContentPage
         }
     }
 
-    private void LoadAudioCover(string audioPath)
+    private bool LoadAudioCover(string audioPath)
     {
         try
         {
@@ -530,26 +530,26 @@ public partial class PlayerPage : ContentPage
                 if (blurredBytes != null)
                 {
                     CoverBlurImage.Source = ImageSource.FromStream(() => new MemoryStream(blurredBytes));
-                    BlurOverlay.IsVisible = true;
+                    return true;
                 }
                 else
                 {
-                    CoverBlurImage.Source = "empty.png";
-                    BlurOverlay.IsVisible = false;
+                    CoverBlurImage.Source = "audio.png";
+                    return false;
                 }
             }
             else
             {
-                CoverImage.Source = "empty.png";
-                CoverBlurImage.Source = "empty.png";
-                BlurOverlay.IsVisible = false;
+                CoverImage.Source = "audio.png";
+                CoverBlurImage.Source = "audio.png";
+                return false;
             }
         }
         catch
         {
-            CoverImage.Source = "empty.png";
-            CoverBlurImage.Source = "empty.png";
-            BlurOverlay.IsVisible = false;
+            CoverImage.Source = "audio.png";
+            CoverBlurImage.Source = "audio.png";
+            return false;
         }
     }
 
