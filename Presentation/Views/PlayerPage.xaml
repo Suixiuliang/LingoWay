@@ -9,7 +9,7 @@
         <Grid x:Name="BlurOverlay"
               IsVisible="False"
               InputTransparent="True"
-              Margin="0,0,0,0">
+              Margin="0,2,0,0">
             <Image x:Name="CoverBlurImage"
                    Source="empty.png"
                    Aspect="AspectFill"
