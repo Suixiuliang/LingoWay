@@ -734,6 +734,7 @@ public partial class PlayerPage : ContentPage
             var currentPos = _viewModel.CurrentPosition;
             var total = _viewModel.TotalDuration;
             TimeLabel.Text = $"{FormatTime(currentPos)} / {FormatTime(total)}";
+            SyncMiniPlayerTime(currentPos, total);
 
             if (!_isDraggingSlider && total.TotalMilliseconds > 0)
             {
@@ -765,6 +766,21 @@ public partial class PlayerPage : ContentPage
         PlayPauseLabel.TextColor = Colors.White;
         PlayPauseButton.Stroke = Colors.White;
         PlayPauseButton.BackgroundColor = Colors.Transparent;
+        SyncMiniPlayer();
+    }
+
+    private void SyncMiniPlayer()
+    {
+        if (Shell.Current is AppShell shell)
+            shell.UpdateMiniPlayer(TitleLabel.Text, CoverImage.Source,
+                _viewModel.CurrentPlaybackState == PlaybackStateEnum.Playing,
+                _viewModel.CurrentPosition, _viewModel.TotalDuration);
+    }
+
+    private void SyncMiniPlayerTime(TimeSpan current, TimeSpan total)
+    {
+        if (Shell.Current is AppShell shell)
+            shell.UpdateMiniPlayerTime(current, total);
     }
 
     private void UpdateSubtitleDisplay(LrcLine? line)

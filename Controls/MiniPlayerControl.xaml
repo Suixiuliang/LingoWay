@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="LingoWay.Controls.MiniPlayerControl"
+             HeightRequest="44"
+             BackgroundColor="#CC17181C">
+    <Grid ColumnDefinitions="*,Auto,Auto,Auto" ColumnSpacing="10" VerticalOptions="Center" Padding="16,0">
+        <!-- 左：标题 -->
+        <Label Grid.Column="0"
+               x:Name="MiniTitleLabel"
+               Text="未播放"
+               TextColor="#D1D5DB"
+               FontSize="12"
+               VerticalTextAlignment="Center"
+               LineBreakMode="TailTruncation"
+               MaxLines="1"/>
+
+        <!-- 时间（靠右） -->
+        <Label Grid.Column="1"
+               x:Name="MiniTimeLabel"
+               Text="00:00 / 00:00"
+               TextColor="#94A3B8"
+               FontSize="11"
+               VerticalTextAlignment="Center"
+               HorizontalTextAlignment="End"/>
+
+        <!-- 播放/暂停按钮 -->
+        <Border x:Name="MiniPlayButton"
+                Grid.Column="2"
+                StrokeShape="RoundRectangle 18"
+                BackgroundColor="Transparent"
+                Stroke="White"
+                StrokeThickness="2"
+                WidthRequest="36"
+                HeightRequest="36"
+                Padding="0">
+            <Label x:Name="MiniPlayIcon"
+                   Text="▶"
+                   FontSize="16"
+                   HorizontalOptions="Center"
+                   VerticalOptions="Center"
+                   TextColor="White"
+                   InputTransparent="True"/>
+            <Border.GestureRecognizers>
+                <TapGestureRecognizer Tapped="OnPlayPauseTapped"/>
+            </Border.GestureRecognizers>
+        </Border>
+
+        <!-- 封面 -->
+        <Border Grid.Column="3"
+                StrokeShape="RoundRectangle 6"
+                Stroke="Transparent"
+                WidthRequest="36"
+                HeightRequest="36"
+                Padding="0"
+                IsVisible="False"
+                x:Name="MiniCoverBorder">
+            <Image x:Name="MiniCoverImage"
+                   Source="audio.png"
+                   Aspect="AspectFill"/>
+        </Border>
+    </Grid>
+</ContentView>
