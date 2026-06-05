@@ -7,7 +7,7 @@ namespace LingoWay
     {
         private MiniPlayerControl? _miniPlayer;
         private View? _originalContent;
-        private Page? _currentOverlayPage;
+        private ContentPage? _currentOverlayPage;
 
         private string _cachedTitle = "未播放";
         private ImageSource? _cachedCover;
@@ -51,15 +51,15 @@ namespace LingoWay
         {
             if (_miniPlayer == null) return;
             if (_currentOverlayPage == page) return;
+            if (page is not ContentPage cp) return;
 
-            // 先从上个页面移除
             RemoveMiniPlayerOverlay();
 
-            var content = page.Content;
+            var content = cp.Content;
             if (content == null) return;
 
             _originalContent = content;
-            _currentOverlayPage = page;
+            _currentOverlayPage = cp;
 
             var wrapper = new Grid
             {
@@ -77,7 +77,7 @@ namespace LingoWay
             Grid.SetRow(_originalContent, 1);
             wrapper.Children.Add(_originalContent);
 
-            page.Content = wrapper;
+            cp.Content = wrapper;
         }
 
         private void RemoveMiniPlayerOverlay()
