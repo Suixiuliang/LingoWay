@@ -38,14 +38,33 @@ namespace LingoWay
             _miniPlayer.IsVisible = currentPage is not PlayerPage;
 
             if (currentPage is ContentPage cp && currentPage is not PlayerPage)
-                EnsureOverlayWrapped(cp);
+                WrapPageContent(cp);
         }
 
-        private void EnsureOverlayWrapped(ContentPage cp)
+        private void WrapPageContent(ContentPage cp)
         {
             if (_wrappedOriginalContents.ContainsKey(cp)) return;
-            if (cp.Content is not View original || _miniPlayer == null) return;
+            if (_miniPlayer == null) return;
 
+            // 页面可能还没加载完 Content 为 null，等 Appearing 再试
+            if (cp.Content is not View original)
+            {
+                cp.Appearing += OnPageAppearing;
+                return;
+            }
+
+            DoWrap(cp, original);
+        }
+
+        private void OnPageAppearing(object? sender, EventArgs e)
+        {
+            if (sender is not ContentPage cp) return;
+            cp.Appearing -= OnPageAppearing;
+            WrapPageContent(cp);
+        }
+
+        private void DoWrap(ContentPage cp, View original)
+        {
             _wrappedOriginalContents[cp] = original;
 
             var wrapper = new Grid
@@ -58,7 +77,7 @@ namespace LingoWay
             };
 
             Grid.SetRow(_miniPlayer, 0);
-            if (_miniPlayer.Parent is Layout p) p.Children.Remove(_miniPlayer);
+            if (_miniPlayer!.Parent is Layout p) p.Children.Remove(_miniPlayer);
             wrapper.Children.Add(_miniPlayer);
 
             Grid.SetRow(original, 1);
