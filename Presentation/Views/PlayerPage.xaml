@@ -43,13 +43,13 @@
                         Grid.Row="0"
                         Grid.Column="0"
                         StrokeShape="RoundRectangle 28"
-                        Stroke="#44FFFFFF"
+                        Stroke="#22FFFFFF"
                         BackgroundColor="#B017181C"
                         Padding="20">
                     <VerticalStackLayout Spacing="18">
                         <Border StrokeShape="RoundRectangle 24"
                                 BackgroundColor="#8822252B"
-                                Stroke="#2FFFFFFF"
+                                Stroke="#17FFFFFF"
                                 HeightRequest="360"
                                 Padding="0">
                             <Grid>
@@ -122,7 +122,7 @@
                                      Spacing="20">
                     <Border x:Name="SubtitleDisplayBorder"
                             StrokeShape="RoundRectangle 28"
-                            Stroke="#44FFFFFF"
+                            Stroke="#22FFFFFF"
                             BackgroundColor="#B017181C"
                             Padding="28"
                             MinimumHeightRequest="240">
@@ -191,7 +191,7 @@
 
                     <Border x:Name="PlaybackControlsBorder"
                             StrokeShape="RoundRectangle 28"
-                            Stroke="#44FFFFFF"
+                            Stroke="#22FFFFFF"
                             BackgroundColor="#B017181C"
                             Padding="24">
                         <VerticalStackLayout Spacing="16">
@@ -312,7 +312,7 @@
                         Grid.Row="0"
                         Grid.Column="0"
                         StrokeShape="RoundRectangle 24"
-                        Stroke="#44FFFFFF"
+                        Stroke="#22FFFFFF"
                         BackgroundColor="#B017181C"
                         Padding="18">
                     <VerticalStackLayout Spacing="8">
@@ -388,7 +388,7 @@
                         Grid.Row="0"
                         Grid.Column="1"
                         StrokeShape="RoundRectangle 24"
-                        Stroke="#44FFFFFF"
+                        Stroke="#22FFFFFF"
                         BackgroundColor="#B017181C"
                         Padding="18">
                     <Grid RowDefinitions="Auto,Auto,Auto,Auto" RowSpacing="12">
@@ -411,7 +411,7 @@
                                 <DataTemplate>
                                     <Border StrokeShape="RoundRectangle 12"
                                             BackgroundColor="#881F2128"
-                                            Stroke="#2FFFFFFF"
+                                            Stroke="#17FFFFFF"
                                             Padding="12,10">
                                         <VerticalStackLayout Spacing="4">
                                             <Label Text="{Binding Word}"
@@ -458,7 +458,7 @@
                                 <DataTemplate>
                                     <Border StrokeShape="RoundRectangle 12"
                                             BackgroundColor="#881A2A1F"
-                                            Stroke="#22FFFFFF"
+                                            Stroke="#11FFFFFF"
                                             Padding="12,10">
                                         <HorizontalStackLayout Spacing="8">
                                             <Label Text="✓"
