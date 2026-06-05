@@ -43,7 +43,7 @@ public class LyricDisplayItem : System.ComponentModel.INotifyPropertyChanged
         set { _fontAttr = value; OnPropertyChanged(); }
     }
 
-    private Color _backgroundColor = Color.FromArgb("#15171C");
+    private Color _backgroundColor = Color.FromArgb("#B015171C");
     public Color BackgroundColor
     {
         get => _backgroundColor;
@@ -1189,7 +1189,7 @@ public partial class PlayerPage : ContentPage
                 MarkedWordsColor = lineMarkColor,
                 TextColor = Color.FromArgb("#D1D5DB"),
                 FontAttr = "None",
-                BackgroundColor = Color.FromArgb("#15171C")
+                BackgroundColor = Color.FromArgb("#B015171C")
             });
         }
     }
@@ -1219,19 +1219,19 @@ public partial class PlayerPage : ContentPage
             {
                 item.TextColor = Colors.White;
                 item.FontAttr = "Bold";
-                item.BackgroundColor = Color.FromArgb("#1E2A4A");
+                item.BackgroundColor = Color.FromArgb("#B01E2A4A");
             }
             else if (i < currentIndex)
             {
                 item.TextColor = Color.FromArgb("#6B7280");
                 item.FontAttr = "None";
-                item.BackgroundColor = Color.FromArgb("#15171C");
+                item.BackgroundColor = Color.FromArgb("#B015171C");
             }
             else
             {
                 item.TextColor = Color.FromArgb("#D1D5DB");
                 item.FontAttr = "None";
-                item.BackgroundColor = Color.FromArgb("#15171C");
+                item.BackgroundColor = Color.FromArgb("#B015171C");
             }
         }
 
@@ -1466,13 +1466,13 @@ public partial class PlayerPage : ContentPage
         {
             FavoriteButton.Text = "★";
             FavoriteButton.TextColor = Color.FromArgb("#FACC15");
-            FavoriteButton.BackgroundColor = Color.FromArgb("#2B2400");
+            FavoriteButton.BackgroundColor = Color.FromArgb("#882B2400");
         }
         else
         {
             FavoriteButton.Text = "☆";
             FavoriteButton.TextColor = Color.FromArgb("#9CA3AF");
-            FavoriteButton.BackgroundColor = Color.FromArgb("#22252B");
+            FavoriteButton.BackgroundColor = Color.FromArgb("#8822252B");
         }
     }
 
@@ -1485,7 +1485,7 @@ public partial class PlayerPage : ContentPage
 
             var isActive = float.TryParse(button.ClassId, System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out var buttonRate)
                            && Math.Abs(buttonRate - rate) < 0.01f;
-            button.BackgroundColor = isActive ? Color.FromArgb("#2D7DFF") : Color.FromArgb("#1A1D24");
+            button.BackgroundColor = isActive ? Color.FromArgb("#2D7DFF") : Color.FromArgb("#881A1D24");
             button.TextColor = isActive ? Colors.White : Color.FromArgb("#9CA3AF");
         }
     }

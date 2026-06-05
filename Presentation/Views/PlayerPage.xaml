@@ -19,7 +19,8 @@
                     InputTransparent="True"/>
         </Grid>
 
-        <ScrollView x:Name="PageScrollView">
+        <ScrollView x:Name="PageScrollView"
+                    BackgroundColor="Transparent">
         <Grid Padding="20" HorizontalOptions="Center" MaximumWidthRequest="1280" RowSpacing="20">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
@@ -42,12 +43,12 @@
                         Grid.Row="0"
                         Grid.Column="0"
                         StrokeShape="RoundRectangle 28"
-                        Stroke="#22FFFFFF"
-                        BackgroundColor="#17181C"
+                        Stroke="#44FFFFFF"
+                        BackgroundColor="#B017181C"
                         Padding="20">
                     <VerticalStackLayout Spacing="18">
                         <Border StrokeShape="RoundRectangle 24"
-                                BackgroundColor="#22252B"
+                                BackgroundColor="#8822252B"
                                 Stroke="#2FFFFFFF"
                                 HeightRequest="360"
                                 Padding="0">
@@ -87,7 +88,7 @@
                                     x:Name="ImportAudioButton"
                                     Text="导入音频"
                                     Clicked="OnImportAudioClicked"
-                                    BackgroundColor="#005FB8"
+                                    BackgroundColor="#B0005FB8"
                                     TextColor="White"
                                     CornerRadius="4"
                                     HeightRequest="36"/>
@@ -95,11 +96,11 @@
                                     x:Name="ImportSubtitleButton"
                                     Text="导入字幕"
                                     Clicked="OnImportSubtitleClicked"
-                                    BackgroundColor="#2D2D2D"
+                                    BackgroundColor="#882D2D2D"
                                     TextColor="White"
                                     CornerRadius="4"
                                     BorderWidth="1"
-                                    BorderColor="#3D3D3D"
+                                    BorderColor="#663D3D3D"
                                     HeightRequest="36"/>
                             <Button Grid.Column="2"
                                     x:Name="FavoriteButton"
@@ -121,8 +122,8 @@
                                      Spacing="20">
                     <Border x:Name="SubtitleDisplayBorder"
                             StrokeShape="RoundRectangle 28"
-                            Stroke="#22FFFFFF"
-                            BackgroundColor="#17181C"
+                            Stroke="#44FFFFFF"
+                            BackgroundColor="#B017181C"
                             Padding="28"
                             MinimumHeightRequest="240">
                         <Grid x:Name="SubtitleInnerGrid"
@@ -190,8 +191,8 @@
 
                     <Border x:Name="PlaybackControlsBorder"
                             StrokeShape="RoundRectangle 28"
-                            Stroke="#22FFFFFF"
-                            BackgroundColor="#17181C"
+                            Stroke="#44FFFFFF"
+                            BackgroundColor="#B017181C"
                             Padding="24">
                         <VerticalStackLayout Spacing="16">
                             <Slider x:Name="ProgressSlider"
@@ -206,7 +207,7 @@
 
                             <HorizontalStackLayout HorizontalOptions="Center" Spacing="24" VerticalOptions="Center">
                                 <Border StrokeShape="RoundRectangle 22"
-                                        BackgroundColor="#22252B"
+                                        BackgroundColor="#8822252B"
                                         Stroke="Transparent"
                                         WidthRequest="44"
                                         HeightRequest="44"
@@ -245,7 +246,7 @@
                                 </Border>
 
                                 <Border StrokeShape="RoundRectangle 22"
-                                        BackgroundColor="#22252B"
+                                        BackgroundColor="#8822252B"
                                         Stroke="Transparent"
                                         WidthRequest="44"
                                         HeightRequest="44"
@@ -265,10 +266,10 @@
                             <HorizontalStackLayout x:Name="PlaybackRateButtons"
                                                    Spacing="8"
                                                    HorizontalOptions="Center">
-                                <Button Text="0.5x" TextColor="#9CA3AF" BackgroundColor="#1A1D24" CornerRadius="14" Padding="14,8" Clicked="OnPlaybackRateClicked" ClassId="0.5" FontSize="12"/>
+                                <Button Text="0.5x" TextColor="#9CA3AF" BackgroundColor="#881A1D24" CornerRadius="14" Padding="14,8" Clicked="OnPlaybackRateClicked" ClassId="0.5" FontSize="12"/>
                                 <Button x:Name="Rate1Button" Text="1.0x" TextColor="White" BackgroundColor="#2D7DFF" CornerRadius="14" Padding="14,8" Clicked="OnPlaybackRateClicked" ClassId="1.0" FontSize="12"/>
-                                <Button Text="1.5x" TextColor="#9CA3AF" BackgroundColor="#1A1D24" CornerRadius="14" Padding="14,8" Clicked="OnPlaybackRateClicked" ClassId="1.5" FontSize="12"/>
-                                <Button Text="2.0x" TextColor="#9CA3AF" BackgroundColor="#1A1D24" CornerRadius="14" Padding="14,8" Clicked="OnPlaybackRateClicked" ClassId="2.0" FontSize="12"/>
+                                <Button Text="1.5x" TextColor="#9CA3AF" BackgroundColor="#881A1D24" CornerRadius="14" Padding="14,8" Clicked="OnPlaybackRateClicked" ClassId="1.5" FontSize="12"/>
+                                <Button Text="2.0x" TextColor="#9CA3AF" BackgroundColor="#881A1D24" CornerRadius="14" Padding="14,8" Clicked="OnPlaybackRateClicked" ClassId="2.0" FontSize="12"/>
                             </HorizontalStackLayout>
 
                             <!-- 自定义倍速拖条 -->
@@ -311,8 +312,8 @@
                         Grid.Row="0"
                         Grid.Column="0"
                         StrokeShape="RoundRectangle 24"
-                        Stroke="#22FFFFFF"
-                        BackgroundColor="#17181C"
+                        Stroke="#44FFFFFF"
+                        BackgroundColor="#B017181C"
                         Padding="18">
                     <VerticalStackLayout Spacing="8">
                         <Grid ColumnDefinitions="Auto,*,Auto" Margin="0,0,0,8">
@@ -337,6 +338,7 @@
                         <ScrollView x:Name="LyricsScrollView"
                                     HeightRequest="380"
                                     VerticalScrollBarVisibility="Always"
+                                    BackgroundColor="Transparent"
                                     Scrolled="OnLyricsScrolled">
                         <VerticalStackLayout x:Name="LyricsStackLayout"
                                             Spacing="6">
@@ -386,8 +388,8 @@
                         Grid.Row="0"
                         Grid.Column="1"
                         StrokeShape="RoundRectangle 24"
-                        Stroke="#22FFFFFF"
-                        BackgroundColor="#17181C"
+                        Stroke="#44FFFFFF"
+                        BackgroundColor="#B017181C"
                         Padding="18">
                     <Grid RowDefinitions="Auto,Auto,Auto,Auto" RowSpacing="12">
                         <!-- 生词本 -->
@@ -400,6 +402,7 @@
                                         Grid.Row="1"
                                         SelectionMode="Single"
                                         SelectionChanged="OnMarkedWordSelected"
+                                        BackgroundColor="Transparent"
                                         HeightRequest="180">
                             <CollectionView.ItemsLayout>
                                 <LinearItemsLayout Orientation="Vertical" ItemSpacing="6"/>
@@ -407,7 +410,7 @@
                             <CollectionView.ItemTemplate>
                                 <DataTemplate>
                                     <Border StrokeShape="RoundRectangle 12"
-                                            BackgroundColor="#1F2128"
+                                            BackgroundColor="#881F2128"
                                             Stroke="#2FFFFFFF"
                                             Padding="12,10">
                                         <VerticalStackLayout Spacing="4">
@@ -446,6 +449,7 @@
                                         Grid.Row="3"
                                         SelectionMode="Single"
                                         SelectionChanged="OnMasteredWordSelected"
+                                        BackgroundColor="Transparent"
                                         HeightRequest="150">
                             <CollectionView.ItemsLayout>
                                 <LinearItemsLayout Orientation="Vertical" ItemSpacing="6"/>
@@ -453,7 +457,7 @@
                             <CollectionView.ItemTemplate>
                                 <DataTemplate>
                                     <Border StrokeShape="RoundRectangle 12"
-                                            BackgroundColor="#1A2A1F"
+                                            BackgroundColor="#881A2A1F"
                                             Stroke="#22FFFFFF"
                                             Padding="12,10">
                                         <HorizontalStackLayout Spacing="8">
