@@ -482,6 +482,22 @@ public partial class PlayerPage : ContentPage
         }
     }
 
+    /// <summary>
+    /// 后台翻译当前句子并更新 ChineseTextLabel
+    /// </summary>
+    private async Task TranslateAndDisplaySentenceAsync(string englishText)
+    {
+        if (string.IsNullOrWhiteSpace(englishText)) return;
+        var translation = await _translationService.TranslateSingleAsync(englishText);
+        if (!string.IsNullOrWhiteSpace(translation))
+        {
+            MainThread.BeginInvokeOnMainThread(() =>
+            {
+                ChineseTextLabel.Text = translation;
+            });
+        }
+    }
+
     private async void OnImportSubtitleClicked(object? sender, EventArgs e)
     {
         try
@@ -763,7 +779,7 @@ public partial class PlayerPage : ContentPage
                 TextColor = Color.FromArgb("#6B7280"),
                 FontSize = 28
             });
-            ChineseTextLabel.Text = "_中文翻译_";
+            ChineseTextLabel.Text = "";
             WordTranslationLabel.Text = "";
             MarkedVocabLabel.Text = "";
             _hoverAnimTokens.Clear();
@@ -772,7 +788,10 @@ public partial class PlayerPage : ContentPage
 
         _hoverAnimTokens.Clear();
 
-        ChineseTextLabel.Text = "_中文翻译_";
+        ChineseTextLabel.Text = "";
+        // 后台翻译当前句子
+        _ = TranslateAndDisplaySentenceAsync(displayLine.EnglishText);
+
         WordTranslationLabel.Text = "";
 
         var markedInLine = GetMarkedWordsForLine(displayLine).ToList();

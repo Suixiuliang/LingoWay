@@ -41,6 +41,35 @@ public class WordTranslationService
     }
 
     /// <summary>
+    /// 翻译单个文本（单词或句子），自动缓存
+    /// </summary>
+    public async Task<string?> TranslateSingleAsync(string text, string sourceLang = "en", string targetLang = "zh")
+    {
+        if (string.IsNullOrWhiteSpace(text)) return null;
+        var key = text.Trim();
+        
+        // 先查缓存
+        if (_cache.TryGetValue(key, out var cached))
+            return cached;
+
+        try
+        {
+            var translation = await FetchTranslationAsync(key, sourceLang, targetLang);
+            if (!string.IsNullOrWhiteSpace(translation))
+            {
+                _cache[key] = translation;
+                SaveCache();
+                return translation;
+            }
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"[WordTranslation] TranslateSingle failed for '{key}': {ex.Message}");
+        }
+        return null;
+    }
+
+    /// <summary>
     /// 批量翻译单词（跳过已缓存的，只翻译新词）
     /// </summary>
     public async Task TranslateWordsAsync(IEnumerable<string> words, string sourceLang = "en", string targetLang = "zh")
