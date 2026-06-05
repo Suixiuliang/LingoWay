@@ -6,8 +6,7 @@ namespace LingoWay
     public partial class AppShell : Shell
     {
         private MiniPlayerControl? _miniPlayer;
-        private View? _originalContent;
-        private ContentPage? _currentOverlayPage;
+        private readonly Dictionary<ContentPage, View> _wrappedOriginalContents = new();
 
         private string _cachedTitle = "未播放";
         private ImageSource? _cachedCover;
@@ -23,43 +22,31 @@ namespace LingoWay
 
         private void OnShellNavigated(object? sender, ShellNavigatedEventArgs e)
         {
+            if (_miniPlayer == null)
+            {
+                var audioService = IPlatformApplication.Current?.Services
+                    .GetService(typeof(Application.Services.IAudioPlaybackService))
+                    as Application.Services.IAudioPlaybackService;
+                _miniPlayer = new MiniPlayerControl(audioService!);
+                _miniPlayer.SetTitle(_cachedTitle);
+                _miniPlayer.SetCover(_cachedCover);
+                _miniPlayer.SetPlayState(_cachedIsPlaying);
+                _miniPlayer.SetTime(_cachedCurrentPos, _cachedTotalDur);
+            }
+
             var currentPage = CurrentPage;
-            if (currentPage is PlayerPage)
-            {
-                RemoveMiniPlayerOverlay();
-                _miniPlayer?.Detach();
-                _miniPlayer = null;
-            }
-            else if (currentPage != null)
-            {
-                if (_miniPlayer == null)
-                {
-                    var audioService = IPlatformApplication.Current?.Services
-                        .GetService(typeof(Application.Services.IAudioPlaybackService))
-                        as Application.Services.IAudioPlaybackService;
-                    _miniPlayer = new MiniPlayerControl(audioService!);
-                    _miniPlayer.SetTitle(_cachedTitle);
-                    _miniPlayer.SetCover(_cachedCover);
-                    _miniPlayer.SetPlayState(_cachedIsPlaying);
-                    _miniPlayer.SetTime(_cachedCurrentPos, _cachedTotalDur);
-                }
-                AddMiniPlayerOverlay(currentPage);
-            }
+            _miniPlayer.IsVisible = currentPage is not PlayerPage;
+
+            if (currentPage is ContentPage cp && currentPage is not PlayerPage)
+                EnsureOverlayWrapped(cp);
         }
 
-        private void AddMiniPlayerOverlay(Page page)
+        private void EnsureOverlayWrapped(ContentPage cp)
         {
-            if (_miniPlayer == null) return;
-            if (_currentOverlayPage == page) return;
-            if (page is not ContentPage cp) return;
+            if (_wrappedOriginalContents.ContainsKey(cp)) return;
+            if (cp.Content is not View original || _miniPlayer == null) return;
 
-            RemoveMiniPlayerOverlay();
-
-            var content = cp.Content;
-            if (content == null) return;
-
-            _originalContent = content;
-            _currentOverlayPage = cp;
+            _wrappedOriginalContents[cp] = original;
 
             var wrapper = new Grid
             {
@@ -74,19 +61,10 @@ namespace LingoWay
             if (_miniPlayer.Parent is Layout p) p.Children.Remove(_miniPlayer);
             wrapper.Children.Add(_miniPlayer);
 
-            Grid.SetRow(_originalContent, 1);
-            wrapper.Children.Add(_originalContent);
+            Grid.SetRow(original, 1);
+            wrapper.Children.Add(original);
 
             cp.Content = wrapper;
-        }
-
-        private void RemoveMiniPlayerOverlay()
-        {
-            if (_currentOverlayPage == null || _originalContent == null) return;
-
-            _currentOverlayPage.Content = _originalContent;
-            _originalContent = null;
-            _currentOverlayPage = null;
         }
 
         public void UpdateMiniPlayer(string? title, ImageSource? cover, bool isPlaying, TimeSpan current, TimeSpan total)
