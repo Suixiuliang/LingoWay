@@ -110,6 +110,17 @@ public partial class PlayerPage : ContentPage
     private Dictionary<string, int> _wordMasteryLevels = new(StringComparer.OrdinalIgnoreCase);
     private bool _audioLoaded;
 
+    private readonly WordTranslationService _translationService;
+
+    /// <summary>
+    /// 获取单词翻译（缓存优先，无缓存则返回占位符）
+    /// </summary>
+    private string GetTranslation(string word)
+    {
+        var t = _translationService.GetTranslation(word);
+        return t ?? "_单词中译_";
+    }
+
     /// <summary>屏蔽词还原映射：归一化词 → 显示原形（fuck → f**k）</summary>
     private readonly Dictionary<string, string> _censoredForm = new(StringComparer.OrdinalIgnoreCase);
 
@@ -220,6 +231,7 @@ public partial class PlayerPage : ContentPage
         InitializeComponent();
         _viewModel = viewModel;
         _audioService = audioService;
+        _translationService = new WordTranslationService();
         BindingContext = viewModel;
         ApplyPlatformLayout();
 #if WINDOWS
@@ -402,6 +414,18 @@ public partial class PlayerPage : ContentPage
         }
     }
 
+    /// <summary>
+    /// 提取当前 LRC 所有单词并触发后台翻译
+    /// </summary>
+    private async Task TranslateAllWordsAsync()
+    {
+        var words = _viewModel.LrcLines
+            .SelectMany(l => l.Words ?? [])
+            .Select(w => w.Word)
+            .Where(w => !string.IsNullOrWhiteSpace(w));
+        await _translationService.TranslateWordsAsync(words);
+    }
+
     private async void OnImportAudioClicked(object? sender, EventArgs e)
     {
         try
@@ -444,6 +468,10 @@ public partial class PlayerPage : ContentPage
             RefreshMasteredWordsDisplay();
             RebuildLyricsList();
             UpdateSubtitleDisplay(_viewModel.CurrentLrcLine);
+
+            // 后台翻译所有单词（不阻塞 UI）
+            _ = TranslateAllWordsAsync();
+
             UpdateFavoriteButton();
             UpdatePlaybackRateButtons(_viewModel.PlaybackRate);
             UpdatePlayPauseIcon();
@@ -479,6 +507,9 @@ public partial class PlayerPage : ContentPage
             RefreshMasteredWordsDisplay();
             RebuildLyricsList();
             UpdateSubtitleDisplay(_viewModel.CurrentLrcLine);
+
+            // 后台翻译所有单词
+            _ = TranslateAllWordsAsync();
         }
         catch (Exception ex)
         {
@@ -746,7 +777,7 @@ public partial class PlayerPage : ContentPage
 
         var markedInLine = GetMarkedWordsForLine(displayLine).ToList();
         MarkedVocabLabel.Text = markedInLine.Count > 0
-            ? "★ " + string.Join("  ", markedInLine.Select(w => $"{w}(_单词中译_)"))
+            ? "★ " + string.Join("  ", markedInLine.Select(w => $"{w}({GetTranslation(w)})"))
             : "";
 
         if (displayLine.Words == null || displayLine.Words.Count == 0)
@@ -833,7 +864,7 @@ public partial class PlayerPage : ContentPage
                 {
                     var exp = Contractions.TryGetValue(word.Word, out var p)
                         ? $" ({string.Join(" ", p)})" : "";
-                    WordTranslationLabel.Text = $"{word.Word}{exp}  _单词中译_";
+                    WordTranslationLabel.Text = $"{word.Word}{exp}  {GetTranslation(word.Word)}";
                     return;
                 }
 
@@ -843,7 +874,7 @@ public partial class PlayerPage : ContentPage
                 wordLabel.TextColor = Color.FromArgb("#FDE68A");
                 var exp2 = Contractions.TryGetValue(word.Word, out var pp)
                     ? $" ({string.Join(" ", pp)})" : "";
-                WordTranslationLabel.Text = $"{word.Word}{exp2}  _单词中译_";
+                WordTranslationLabel.Text = $"{word.Word}{exp2}  {GetTranslation(word.Word)}";
             }
 
             void EndHover()
@@ -1011,7 +1042,7 @@ public partial class PlayerPage : ContentPage
             underline.Color = red;
             underline.ScaleX = 1.0;
             var exp = allParts.Count > 1 ? $" ({string.Join(" ", allParts.Skip(1))})" : "";
-            WordTranslationLabel.Text = $"{word}{exp}  _单词中译_";
+            WordTranslationLabel.Text = $"{word}{exp}  {GetTranslation(word)}";
 
             if (!string.IsNullOrEmpty(_currentLrcFilePath))
                 foreach (var p in allParts)
@@ -1184,7 +1215,7 @@ public partial class PlayerPage : ContentPage
             {
                 Line = line,
                 MarkedWordsText = markedWords.Count > 0
-                    ? string.Join("  ", markedWords.Select(w => $"{w}(_单词中译_)"))
+                    ? string.Join("  ", markedWords.Select(w => $"{w}({GetTranslation(w)})"))
                     : "",
                 MarkedWordsColor = lineMarkColor,
                 TextColor = Color.FromArgb("#D1D5DB"),
@@ -1331,7 +1362,7 @@ public partial class PlayerPage : ContentPage
             _markedWords.Add(new MarkedWordItem
             {
                 Word = word,
-                Translation = "_单词中译_",
+                Translation = GetTranslation(word),
                 Source = _viewModel.CurrentEpisode?.Title ?? "",
                 Color = GetWordColorByMastery(level),
                 LevelLabel = level == 0 ? "新词" : $"Lv.{level}"
