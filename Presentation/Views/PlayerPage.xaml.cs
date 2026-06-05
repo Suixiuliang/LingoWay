@@ -1297,12 +1297,8 @@ public partial class PlayerPage : ContentPage
 
     private void OnLyricsScrolled(object? sender, ScrolledEventArgs e)
     {
+        // 鼠标手动滚动字幕区不再取消自动滚动勾选
         if (_isAutoScrollingProgrammatic) return;
-        if (_autoScrollEnabled)
-        {
-            _autoScrollEnabled = false;
-            AutoScrollCheckBox.IsChecked = false;
-        }
     }
 
     private HashSet<string> GetCurrentFileWords()
