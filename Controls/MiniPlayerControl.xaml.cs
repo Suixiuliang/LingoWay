@@ -1,5 +1,6 @@
 using LingoWay.Application.Services;
 using LingoWay.Domain.Models;
+using SkiaSharp;
 
 namespace LingoWay.Controls;
 
@@ -7,6 +8,9 @@ public partial class MiniPlayerControl : ContentView
 {
     private readonly IAudioPlaybackService? _audioService;
     private bool _isPlaying;
+    private ImageSource? _rawSource; // 保存原始来源，用于对比避免重复处理
+
+    private const int ThumbSize = 72; // 缩略图尺寸 (36px 显示 × 2x DPI = 72px)
 
     public MiniPlayerControl()
     {
@@ -28,8 +32,77 @@ public partial class MiniPlayerControl : ContentView
 
     public void SetCover(ImageSource? source)
     {
-        if (source != null) { MiniCoverImage.Source = source; MiniCoverBorder.IsVisible = true; }
-        else MiniCoverBorder.IsVisible = false;
+        if (source == null)
+        {
+            MiniCoverBorder.IsVisible = false;
+            _rawSource = null;
+            return;
+        }
+
+        if (ReferenceEquals(source, _rawSource)) return;
+        _rawSource = source;
+
+        var thumb = CreateThumbnail(source);
+        if (thumb == null)
+        {
+            MiniCoverBorder.IsVisible = false;
+            return;
+        }
+
+        MiniCoverImage.Source = thumb;
+        MiniCoverBorder.IsVisible = true;
+    }
+
+    private static ImageSource? CreateThumbnail(ImageSource source)
+    {
+        try
+        {
+            byte[]? bytes = null;
+
+            if (source is FileImageSource fileSrc)
+                bytes = File.ReadAllBytes(fileSrc.File);
+            else if (source is StreamImageSource streamSrc)
+            {
+                var cancelToken = new System.Threading.CancellationTokenSource(3000).Token;
+                var stream = streamSrc.Stream(cancelToken).GetAwaiter().GetResult();
+                if (stream != null)
+                {
+                    using (stream)
+                    using (var ms = new MemoryStream())
+                    {
+                        stream.CopyTo(ms);
+                        bytes = ms.ToArray();
+                    }
+                }
+            }
+
+            if (bytes == null) return null;
+
+            using var original = SKBitmap.Decode(bytes);
+            if (original == null) return null;
+
+            // 等比例缩放到 ThumbSize×ThumbSize 画布中，居中显示
+            float scale = Math.Min((float)ThumbSize / original.Width, (float)ThumbSize / original.Height);
+            float w = original.Width * scale;
+            float h = original.Height * scale;
+            float x = (ThumbSize - w) / 2f;
+            float y = (ThumbSize - h) / 2f;
+
+            using var surface = SKSurface.Create(new SKImageInfo(ThumbSize, ThumbSize));
+            var canvas = surface.Canvas;
+            canvas.Clear(SKColors.Transparent);
+            canvas.DrawBitmap(original, new SKRect(x, y, x + w, y + h),
+                new SKSamplingOptions(SKCubicResampler.Mitchell));
+
+            using var snapshot = surface.Snapshot();
+            using var data = snapshot.Encode(SKEncodedImageFormat.Png, 85);
+
+            return ImageSource.FromStream(() => new MemoryStream(data.ToArray()));
+        }
+        catch
+        {
+            return null;
+        }
     }
 
     public void SetPlayState(bool isPlaying)
