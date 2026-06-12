@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="LingoWay.Views.SplashPage"
+             BackgroundColor="#0D0D12"
+             Shell.NavBarIsVisible="False"
+             Shell.TabBarIsVisible="False">
+
+    <Grid RowDefinitions="*,Auto,*" Padding="40">
+        <!-- 居中主区域 -->
+        <VerticalStackLayout Grid.Row="1"
+                             VerticalOptions="Center"
+                             HorizontalOptions="Center"
+                             Spacing="24">
+
+            <!-- 三个加载点 -->
+            <HorizontalStackLayout x:Name="LoadingDots"
+                                   HorizontalOptions="Center"
+                                   Spacing="12"
+                                   Opacity="0">
+                <BoxView x:Name="Dot1" Color="#6366F1" WidthRequest="6" HeightRequest="6" CornerRadius="3"/>
+                <BoxView x:Name="Dot2" Color="#818CF8" WidthRequest="6" HeightRequest="6" CornerRadius="3"/>
+                <BoxView x:Name="Dot3" Color="#A5B4FC" WidthRequest="6" HeightRequest="6" CornerRadius="3"/>
+            </HorizontalStackLayout>
+
+            <!-- 底部光条 -->
+            <BoxView x:Name="GlowLine"
+                     Color="#6366F1"
+                     HeightRequest="2"
+                     WidthRequest="1200"
+                     CornerRadius="1"
+                     HorizontalOptions="Center"
+                     AnchorX="0.5"
+                     Opacity="0"
+                     ScaleX="0"/>
+
+            <!-- 应用名称 -->
+            <Label x:Name="AppTitleLabel"
+                   Text="LingoWay"
+                   FontSize="42"
+                   FontAttributes="Bold"
+                   TextColor="White"
+                   HorizontalTextAlignment="Center"
+                   Opacity="0"
+                   Scale="0.6"/>
+
+            <!-- Slogan -->
+            <Label x:Name="SloganLabel"
+                   Text="Language immersion, one episode at a time"
+                   FontSize="14"
+                   TextColor="#818CF8"
+                   HorizontalTextAlignment="Center"
+                   Opacity="0"
+                   CharacterSpacing="2"/>
+        </VerticalStackLayout>
+    </Grid>
+</ContentPage>

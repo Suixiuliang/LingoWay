@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="LingoWay.Views.DictPopupPage"
+             BackgroundColor="#CC000000"
+             Shell.NavBarIsVisible="False">
+
+    <!-- 点击遮罩关闭 -->
+    <Grid RowDefinitions="*" VerticalOptions="Fill" HorizontalOptions="Fill">
+        <Grid.GestureRecognizers>
+            <TapGestureRecognizer Tapped="OnBackdropTapped"/>
+        </Grid.GestureRecognizers>
+
+        <!-- 弹窗卡片 -->
+        <Border StrokeShape="RoundRectangle 12"
+                BackgroundColor="#1E1F28"
+                Stroke="#3D3D3D"
+                StrokeThickness="1"
+                Padding="24,16,24,20"
+                WidthRequest="560"
+                MaximumHeightRequest="580"
+                HorizontalOptions="Center"
+                VerticalOptions="Center"
+                InputTransparent="False">
+            <Border.GestureRecognizers>
+                <TapGestureRecognizer/> <!-- 阻止冒泡 -->
+            </Border.GestureRecognizers>
+            <VerticalStackLayout Spacing="0">
+
+                <!-- 标题栏 -->
+                <Grid ColumnDefinitions="*,Auto" Margin="0,4,0,12">
+                    <Label x:Name="TitleLabel"
+                           FontSize="22" FontAttributes="Bold"
+                           TextColor="#F4A100"
+                           HorizontalOptions="Start"/>
+                    <Border Grid.Column="1"
+                            StrokeShape="RoundRectangle 4"
+                            BackgroundColor="#3D3D3D"
+                            Stroke="Transparent"
+                            HeightRequest="32" WidthRequest="32"
+                            Padding="0">
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer Tapped="OnCloseTapped"/>
+                        </Border.GestureRecognizers>
+                        <Label Text="✕" TextColor="#D1D5DB" FontSize="16"
+                               HorizontalOptions="Center" VerticalOptions="Center"/>
+                    </Border>
+                </Grid>
+
+                <!-- 标签栏 -->
+                <HorizontalStackLayout Spacing="0">
+                    <Border x:Name="TabOxford" StrokeShape="RoundRectangle 4,4,0,0"
+                            BackgroundColor="#3B3B40" Stroke="#005FB8" StrokeThickness="2"
+                            Padding="20,10,20,8" MinimumWidthRequest="100">
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer Tapped="OnOxfordTabTapped"/>
+                        </Border.GestureRecognizers>
+                        <Label x:Name="LabelOxford" Text="牛津词典" TextColor="White"
+                               FontSize="13" FontAttributes="Bold"
+                               HorizontalOptions="Center" VerticalOptions="Center"/>
+                    </Border>
+                    <Border x:Name="TabCollins" StrokeShape="RoundRectangle 4,4,0,0"
+                            BackgroundColor="#27272A" Stroke="Transparent" StrokeThickness="0"
+                            Padding="20,10,20,8" MinimumWidthRequest="100">
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer Tapped="OnCollinsTabTapped"/>
+                        </Border.GestureRecognizers>
+                        <Label x:Name="LabelCollins" Text="柯林斯词典" TextColor="#9CA3AF"
+                               FontSize="13" FontAttributes="None"
+                               HorizontalOptions="Center" VerticalOptions="Center"/>
+                    </Border>
+                    <Border x:Name="TabUrban" StrokeShape="RoundRectangle 4,4,0,0"
+                            BackgroundColor="#27272A" Stroke="Transparent" StrokeThickness="0"
+                            Padding="20,10,20,8" MinimumWidthRequest="100">
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer Tapped="OnUrbanTabTapped"/>
+                        </Border.GestureRecognizers>
+                        <Label x:Name="LabelUrban" Text="俚语词典" TextColor="#9CA3AF"
+                               FontSize="13" FontAttributes="None"
+                               HorizontalOptions="Center" VerticalOptions="Center"/>
+                    </Border>
+                </HorizontalStackLayout>
+
+                <!-- 标签下划线 -->
+                <BoxView HeightRequest="1" Color="#3D3D3D" Margin="0,-1,0,8"/>
+
+                <!-- 内容区 -->
+                <ScrollView MaximumHeightRequest="400">
+                    <Grid>
+                        <VerticalStackLayout x:Name="ContentOxford" Spacing="0" IsVisible="True"/>
+                        <VerticalStackLayout x:Name="ContentCollins" Spacing="0" IsVisible="False"/>
+                        <VerticalStackLayout x:Name="ContentUrban"   Spacing="0" IsVisible="False"/>
+                    </Grid>
+                </ScrollView>
+
+            </VerticalStackLayout>
+        </Border>
+    </Grid>
+</ContentPage>

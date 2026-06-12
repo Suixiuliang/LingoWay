@@ -239,6 +239,7 @@ public partial class PlayerPage : ContentPage
         _translationService = new WordTranslationService();
         BindingContext = viewModel;
         ApplyPlatformLayout();
+
 #if WINDOWS
         SuppressSliderAnimations();
 #endif
@@ -734,7 +735,8 @@ public partial class PlayerPage : ContentPage
             var currentPos = _viewModel.CurrentPosition;
             var total = _viewModel.TotalDuration;
             TimeLabel.Text = $"{FormatTime(currentPos)} / {FormatTime(total)}";
-            SyncMiniPlayerTime(currentPos, total);
+            // MiniPlayer removed
+            // SyncMiniPlayerTime(currentPos, total);
 
             if (!_isDraggingSlider && total.TotalMilliseconds > 0)
             {
@@ -766,9 +768,11 @@ public partial class PlayerPage : ContentPage
         PlayPauseLabel.TextColor = Colors.White;
         PlayPauseButton.Stroke = Colors.White;
         PlayPauseButton.BackgroundColor = Colors.Transparent;
-        SyncMiniPlayer();
+        // MiniPlayer removed
+        // SyncMiniPlayer();
     }
 
+    /*
     private void SyncMiniPlayer()
     {
         if (Shell.Current is AppShell shell)
@@ -776,12 +780,15 @@ public partial class PlayerPage : ContentPage
                 _viewModel.CurrentPlaybackState == PlaybackStateEnum.Playing,
                 _viewModel.CurrentPosition, _viewModel.TotalDuration);
     }
+    */
 
+    /*
     private void SyncMiniPlayerTime(TimeSpan current, TimeSpan total)
     {
         if (Shell.Current is AppShell shell)
             shell.UpdateMiniPlayerTime(current, total);
     }
+    */
 
     private void UpdateSubtitleDisplay(LrcLine? line)
     {
@@ -816,7 +823,7 @@ public partial class PlayerPage : ContentPage
 
         var markedInLine = GetMarkedWordsForLine(displayLine).ToList();
         MarkedVocabLabel.Text = markedInLine.Count > 0
-            ? "★ " + string.Join("  ", markedInLine.Select(w => $"{w}({GetTranslation(w)})"))
+            ? "★ " + string.Join("  ", markedInLine)
             : "";
 
         if (displayLine.Words == null || displayLine.Words.Count == 0)
@@ -903,17 +910,29 @@ public partial class PlayerPage : ContentPage
                 {
                     var exp = Contractions.TryGetValue(word.Word, out var p)
                         ? $" ({string.Join(" ", p)})" : "";
-                    WordTranslationLabel.Text = $"{word.Word}{exp}  {GetTranslation(word.Word)}";
+                    var t = GetTranslation(word.Word);
+                    WordTranslationLabel.FormattedText = new FormattedString
+                    {
+                        Spans = {
+                            new Span { Text = word.Word + (exp ?? ""), FontAttributes = FontAttributes.Bold, FontSize = 16 },
+                            new Span { Text = string.IsNullOrWhiteSpace(t) ? "" : "\n" + t, FontSize = 13 }
+                        }
+                    };
                     return;
                 }
 
-                var cts = new CancellationTokenSource();
-                _hoverAnimTokens[word.Word] = cts;
-                _ = AnimateUnderlineIn(underline, cts.Token);
+                var cts2 = new CancellationTokenSource();
+                _hoverAnimTokens[word.Word] = cts2;
+                _ = AnimateUnderlineIn(underline, cts2.Token);
                 wordLabel.TextColor = Color.FromArgb("#FDE68A");
                 var exp2 = Contractions.TryGetValue(word.Word, out var pp)
                     ? $" ({string.Join(" ", pp)})" : "";
-                WordTranslationLabel.Text = $"{word.Word}{exp2}  {GetTranslation(word.Word)}";
+                var t2 = GetTranslation(word.Word);
+                var fs = new FormattedString();
+                fs.Spans.Add(new Span { Text = word.Word + (exp2 ?? ""), FontAttributes = FontAttributes.Bold, FontSize = 16 });
+                if (!string.IsNullOrWhiteSpace(t2))
+                    fs.Spans.Add(new Span { Text = "\n" + t2, FontSize = 13 });
+                WordTranslationLabel.FormattedText = fs;
             }
 
             void EndHover()
@@ -1081,7 +1100,14 @@ public partial class PlayerPage : ContentPage
             underline.Color = red;
             underline.ScaleX = 1.0;
             var exp = allParts.Count > 1 ? $" ({string.Join(" ", allParts.Skip(1))})" : "";
-            WordTranslationLabel.Text = $"{word}{exp}  {GetTranslation(word)}";
+            var tw = GetTranslation(word);
+            WordTranslationLabel.FormattedText = new FormattedString
+            {
+                Spans = {
+                    new Span { Text = word + (exp ?? ""), FontAttributes = FontAttributes.Bold, FontSize = 16 },
+                    new Span { Text = string.IsNullOrWhiteSpace(tw) ? "" : "\n" + tw, FontSize = 13 }
+                }
+            };
 
             if (!string.IsNullOrEmpty(_currentLrcFilePath))
                 foreach (var p in allParts)
@@ -1497,8 +1523,12 @@ public partial class PlayerPage : ContentPage
                 RefreshMarkedWordsDisplay();
                 break;
             case "查询":
-                // 功能暂空
+            {
+                await Shell.Current.GoToAsync("//VocabularyPage");
+                var detail = _translationService.LookupDetail(selected.Word);
+                await DictPopupPage.ShowAsync(this, selected.Word, detail);
                 break;
+            }
         }
     }
 
@@ -1536,8 +1566,12 @@ public partial class PlayerPage : ContentPage
                 RefreshMasteredWordsDisplay();
                 break;
             case "查询":
-                // 功能暂空
+            {
+                await Shell.Current.GoToAsync("//VocabularyPage");
+                var detail = _translationService.LookupDetail(selected.Word);
+                await DictPopupPage.ShowAsync(this, selected.Word, detail);
                 break;
+            }
         }
     }
 

@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="LingoWay.Views.PodcastDetailPage"
+             Title="播客详情"
+             BackgroundColor="{DynamicResource BackgroundPrimary}"
+             Shell.PresentationMode="Animated">
+
+    <Grid RowDefinitions="Auto,*" Padding="0">
+
+    <!-- ============ 播客头部信息卡片 ============ -->
+    <Grid Grid.Row="0" ColumnDefinitions="80,*" ColumnSpacing="14"
+          Padding="16,14,16,10" BackgroundColor="{DynamicResource BackgroundSecondary}">
+
+        <!-- 封面 -->
+        <Border Grid.Column="0" StrokeShape="RoundRectangle 12" Stroke="Transparent"
+                HeightRequest="80" WidthRequest="80" BackgroundColor="#1A1D25">
+            <Image x:Name="CoverImage" Source="empty.png" Aspect="AspectFill"/>
+        </Border>
+
+        <!-- 标题 + 作者 + 描述 -->
+        <VerticalStackLayout Grid.Column="1" Spacing="4" VerticalOptions="Center">
+            <Label x:Name="TitleLabel" Text="播客名称"
+                   TextColor="{DynamicResource TextPrimary}"
+                   FontSize="18" FontAttributes="Bold" MaxLines="2"
+                   LineBreakMode="TailTruncation"/>
+            <Label x:Name="AuthorLabel" Text="作者"
+                   TextColor="{DynamicResource TextSecondary}"
+                   FontSize="14" MaxLines="1" LineBreakMode="TailTruncation"/>
+            <Label x:Name="DescLabel" Text="描述"
+                   TextColor="{DynamicResource TextSecondary}"
+                   FontSize="12" MaxLines="2" LineBreakMode="TailTruncation" Opacity="0.7"/>
+        </VerticalStackLayout>
+    </Grid>
+
+    <!-- 操作按钮行 -->
+    <Border Grid.Row="0" VerticalOptions="End" TranslationY="20"
+            StrokeShape="RoundRectangle 12" BackgroundColor="#005FB8"
+            Stroke="Transparent" HeightRequest="40" WidthRequest="140"
+            HorizontalOptions="Center" Margin="0,0,0,0">
+        <Border.Shadow>
+            <Shadow Brush="#000000" Offset="0,4" Radius="8" Opacity="0.3"/>
+        </Border.Shadow>
+        <HorizontalStackLayout HorizontalOptions="Center" VerticalOptions="Center" Spacing="6">
+            <Label Text="📌" FontSize="16" VerticalOptions="Center"/>
+            <Label x:Name="SubscribeLabel" Text="订阅此播客" TextColor="White"
+                   FontSize="14" FontAttributes="Bold" VerticalOptions="Center"/>
+        </HorizontalStackLayout>
+        <Border.GestureRecognizers>
+            <TapGestureRecognizer Tapped="OnSubscribeTapped"/>
+        </Border.GestureRecognizers>
+    </Border>
+
+    <!-- ============ 剧集列表 ============ -->
+    <Grid Grid.Row="1" RowDefinitions="Auto,*,Auto" Padding="14,28,14,8">
+
+        <!-- 列表头 -->
+        <Grid Grid.Row="0" ColumnDefinitions="*,Auto" Margin="4,0,4,6">
+            <Label Text="📋 剧集列表" TextColor="{DynamicResource TextPrimary}"
+                   FontSize="16" FontAttributes="Bold" VerticalOptions="Center"/>
+            <Label x:Name="EpisodeCount" Grid.Column="1" Text="0 episodes"
+                   TextColor="{DynamicResource TextSecondary}" FontSize="12"
+                   VerticalOptions="Center"/>
+        </Grid>
+
+        <!-- 加载指示器 -->
+        <ActivityIndicator Grid.Row="0" Grid.RowSpan="2" x:Name="LoadingIndicator"
+                           IsRunning="True" IsVisible="True"
+                           Color="#005FB8" HeightRequest="32"
+                           VerticalOptions="Center" HorizontalOptions="Center"/>
+
+        <!-- 剧集 CollectionView -->
+        <CollectionView Grid.Row="1" x:Name="EpisodeList"
+                        SelectionMode="None" Margin="0,4,0,0">
+            <CollectionView.ItemsLayout>
+                <LinearItemsLayout Orientation="Vertical" ItemSpacing="6"/>
+            </CollectionView.ItemsLayout>
+            <CollectionView.ItemTemplate>
+                <DataTemplate>
+                    <Frame Margin="0,2" CornerRadius="12" HasShadow="False"
+                           BorderColor="#2D2D3D" BackgroundColor="{DynamicResource CardBackground}" Padding="12,10">
+                        <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="10" RowDefinitions="Auto,Auto" RowSpacing="4">
+                            <!-- 播放按钮 -->
+                            <Border Grid.Column="0" Grid.RowSpan="2"
+                                    StrokeShape="RoundRectangle 10" BackgroundColor="#1E3A5F"
+                                    Stroke="Transparent" HeightRequest="40" WidthRequest="40"
+                                    VerticalOptions="Center">
+                                <Label Text="▶" TextColor="#7EB8FF" FontSize="18"
+                                       HorizontalOptions="Center" VerticalOptions="Center"/>
+                            </Border>
+
+                            <!-- 标题 -->
+                            <Label Grid.Column="1" Grid.Row="0" Text="{Binding Title}"
+                                   TextColor="{DynamicResource TextPrimary}"
+                                   FontSize="14" FontAttributes="Bold"
+                                   MaxLines="1" LineBreakMode="TailTruncation"/>
+
+                            <!-- 时长 + 日期 -->
+                            <HorizontalStackLayout Grid.Column="1" Grid.Row="1" Spacing="8">
+                                <Label Text="{Binding Duration, StringFormat='{0:hh\\:mm\\:ss}'}"
+                                       TextColor="{DynamicResource TextSecondary}"
+                                       FontSize="11"/>
+                                <Label Text="·" TextColor="#4B5563" FontSize="11"/>
+                                <Label Text="{Binding PublishedDate, StringFormat='{0:yyyy-MM-dd}'}"
+                                       TextColor="{DynamicResource TextSecondary}"
+                                       FontSize="11"/>
+                            </HorizontalStackLayout>
+
+                            <!-- 下载图标 -->
+                            <Border Grid.Column="2" Grid.RowSpan="2"
+                                    StrokeShape="RoundRectangle 8" BackgroundColor="#2D2D2D"
+                                    Stroke="Transparent" HeightRequest="32" WidthRequest="32"
+                                    VerticalOptions="Center">
+                                <Label Text="📥" FontSize="15"
+                                       HorizontalOptions="Center" VerticalOptions="Center"/>
+                            </Border>
+                        </Grid>
+                    </Frame>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+            <CollectionView.EmptyView>
+                <VerticalStackLayout Padding="30" Spacing="10"
+                                     HorizontalOptions="Center" VerticalOptions="Center">
+                    <Label Text="📭" FontSize="40" HorizontalOptions="Center"/>
+                    <Label x:Name="EmptyText" Text="暂无剧集" FontSize="15"
+                           TextColor="#9CA3AF" HorizontalOptions="Center"/>
+                </VerticalStackLayout>
+            </CollectionView.EmptyView>
+        </CollectionView>
+
+        <!-- 底部刷新按钮 -->
+        <Button Grid.Row="2" x:Name="RefreshButton" Text="🔄 刷新剧集"
+                Clicked="OnRefreshClicked"
+                BackgroundColor="{DynamicResource CardBackground}"
+                TextColor="{DynamicResource TextPrimary}"
+                CornerRadius="8" HeightRequest="36" Margin="0,8,0,0"/>
+    </Grid>
+    </Grid>
+</ContentPage>

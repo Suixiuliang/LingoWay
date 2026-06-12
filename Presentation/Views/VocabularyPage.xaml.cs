@@ -2,6 +2,7 @@ using LingoWay.Presentation.ViewModels;
 using LingoWay.Domain.Models;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using LingoWay.Application.Services;
 
 namespace LingoWay.Views;
 
@@ -51,15 +52,19 @@ public partial class VocabularyPage : ContentPage
     private enum Tab { New, Learning, Mastered }
 
     private readonly VocabularyViewModel _viewModel;
+    private readonly WordTranslationService _translationService;
     private readonly ObservableCollection<VocabDisplayItem> _items = new();
     private List<VocabDisplayItem> _allItems = [];
     private Tab _currentTab = Tab.New;
     private bool _batchMode;
 
+    // 词典弹窗通过模态页面 DictPopupPage 呈现
+
     public VocabularyPage(VocabularyViewModel viewModel)
     {
         InitializeComponent();
         _viewModel = viewModel;
+        _translationService = new WordTranslationService();
         VocabCollectionView.ItemsSource = _items;
     }
 
@@ -256,7 +261,17 @@ public partial class VocabularyPage : ContentPage
                 await _viewModel.UpdateMasteryLevelAsync(selected.Word, nl);
                 await LoadWordsAsync();
                 break;
-            case "查询": break;
+            case "查询":
+                ShowDetailPopup(selected.Word);
+                break;
         }
+    }
+
+    // ──── 查询弹窗 ────
+
+    private async void ShowDetailPopup(string word)
+    {
+        var detail = _translationService.LookupDetail(word);
+        await DictPopupPage.ShowAsync(this, word, detail);
     }
 }

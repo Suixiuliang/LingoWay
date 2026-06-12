@@ -35,8 +35,10 @@ namespace LingoWay
                 .AddSingleton<ContentClient>()
                 .AddSingleton<TranslationClient>()
                 .AddSingleton<RssParser>()
+                .AddSingleton<ApplePodcastClient>()
 
                 // 应用层Services
+                .AddSingleton<CuratedRecommendationService>()
                 .AddSingleton<IPlaybackService, PlaybackService>()
                 .AddSingleton<IDownloadService, DownloadService>()
                 .AddSingleton<ISubtitleService, SubtitleService>()
@@ -80,7 +82,8 @@ namespace LingoWay
                 .AddSingleton<DownloadsPage>()
                 .AddSingleton<FavoritesPage>()
                 .AddSingleton<SettingsPage>()
-                .AddSingleton<VocabularyPage>();
+                .AddSingleton<VocabularyPage>()
+                .AddTransient<PodcastDetailPage>();
 
             // Theme service
             builder.Services.AddSingleton<IThemeService, ThemeService>();

@@ -45,14 +45,17 @@
         <!-- ============ 推荐 Tab 内容 ============ -->
         <Grid Grid.Row="2" x:Name="RecommendPanel">
             <CollectionView x:Name="RecommendList"
-                            SelectionMode="Single"
-                            SelectionChanged="OnPodcastSelected">
+                            SelectionMode="None">
                 <CollectionView.ItemTemplate>
                     <DataTemplate>
                         <Frame Margin="10,4" CornerRadius="14" HasShadow="True"
                                BorderColor="{DynamicResource CardBackground}"
-                               BackgroundColor="{DynamicResource CardBackground}" Padding="12">
-                            <Grid ColumnDefinitions="56,*" ColumnSpacing="12">
+                               BackgroundColor="{DynamicResource CardBackground}" Padding="0">
+                            <Frame.GestureRecognizers>
+                                <TapGestureRecognizer Tapped="OnRecommendItemTapped"/>
+                            </Frame.GestureRecognizers>
+
+                            <Grid ColumnDefinitions="56,*,Auto" ColumnSpacing="12" Padding="12,10" MinimumHeightRequest="72">
                                 <Frame Grid.Column="0" CornerRadius="10" Padding="0"
                                        IsClippedToBounds="True" HeightRequest="56" WidthRequest="56"
                                        BackgroundColor="Transparent" BorderColor="Transparent" HasShadow="False">
@@ -66,7 +69,7 @@
                                     <HorizontalStackLayout Spacing="6">
                                         <Border StrokeShape="RoundRectangle 6" BackgroundColor="#1E3A5F"
                                                 Stroke="Transparent" Padding="6,2">
-                                            <Label Text="{Binding Language}" TextColor="#7EB8FF" FontSize="10"/>
+                                            <Label Text="{Binding LevelLabel}" TextColor="#7EB8FF" FontSize="10"/>
                                         </Border>
                                         <Border StrokeShape="RoundRectangle 6" BackgroundColor="#1A3A2A"
                                                 Stroke="Transparent" Padding="6,2">
@@ -75,14 +78,57 @@
                                         </Border>
                                     </HorizontalStackLayout>
                                 </VerticalStackLayout>
+
+                                <!-- 右侧操作按钮面板 (点击展开，横排) -->
+                                <HorizontalStackLayout Grid.Column="2"
+                                                       IsVisible="{Binding IsExpanded}"
+                                                       VerticalOptions="Center"
+                                                       Spacing="6" Padding="0,0,4,0">
+                                    <Border StrokeShape="RoundRectangle 4" BackgroundColor="#005FB8"
+                                            Stroke="Transparent" HeightRequest="30" WidthRequest="44" Padding="0">
+                                        <Border.GestureRecognizers>
+                                            <TapGestureRecognizer Tapped="OnRecommendDetailTapped"/>
+                                        </Border.GestureRecognizers>
+                                        <Label Text="详情" TextColor="White" FontSize="10"
+                                               HorizontalOptions="Center" VerticalOptions="Center"/>
+                                    </Border>
+                                    <Border StrokeShape="RoundRectangle 4" BackgroundColor="#10893E"
+                                            Stroke="Transparent" HeightRequest="30" WidthRequest="44" Padding="0">
+                                        <Border.GestureRecognizers>
+                                            <TapGestureRecognizer Tapped="OnRecommendSubscribeTapped"/>
+                                        </Border.GestureRecognizers>
+                                        <Label Text="订阅" TextColor="White" FontSize="10"
+                                               HorizontalOptions="Center" VerticalOptions="Center"/>
+                                    </Border>
+                                    <Border StrokeShape="RoundRectangle 4" BackgroundColor="#6B3FA0"
+                                            Stroke="Transparent" HeightRequest="30" WidthRequest="44" Padding="0">
+                                        <Border.GestureRecognizers>
+                                            <TapGestureRecognizer Tapped="OnRecommendPreviewTapped"/>
+                                        </Border.GestureRecognizers>
+                                        <Label Text="试听" TextColor="White" FontSize="10"
+                                               HorizontalOptions="Center" VerticalOptions="Center"/>
+                                    </Border>
+                                    <Border StrokeShape="RoundRectangle 4" BackgroundColor="#3D3D3D"
+                                            Stroke="Transparent" HeightRequest="30" WidthRequest="44" Padding="0">
+                                        <Border.GestureRecognizers>
+                                            <TapGestureRecognizer Tapped="OnRecommendShareTapped"/>
+                                        </Border.GestureRecognizers>
+                                        <Label Text="🔗" TextColor="#9CA3AF" FontSize="12"
+                                               HorizontalOptions="Center" VerticalOptions="Center"/>
+                                    </Border>
+                                </HorizontalStackLayout>
                             </Grid>
                         </Frame>
                     </DataTemplate>
                 </CollectionView.ItemTemplate>
                 <CollectionView.EmptyView>
                     <VerticalStackLayout Padding="40" Spacing="12" HorizontalOptions="Center" VerticalOptions="Center">
-                        <Label Text="📻" FontSize="48" HorizontalOptions="Center"/>
-                        <Label Text="还没有推荐内容" FontSize="16" TextColor="#9CA3AF" HorizontalOptions="Center"/>
+                        <VerticalStackLayout.GestureRecognizers>
+                            <TapGestureRecognizer Tapped="OnRecommendEmptyTapped"/>
+                        </VerticalStackLayout.GestureRecognizers>
+                        <Label x:Name="RecommendEmptyIcon" Text="📻" FontSize="48" HorizontalOptions="Center"/>
+                        <Label x:Name="RecommendEmptyText" Text="正在加载推荐..." FontSize="16" TextColor="#9CA3AF" HorizontalOptions="Center"/>
+                        <Label x:Name="RecommendEmptyHint" IsVisible="False" Text="点击重试" FontSize="12" TextColor="#005FB8" HorizontalOptions="Center"/>
                     </VerticalStackLayout>
                 </CollectionView.EmptyView>
             </CollectionView>
@@ -91,7 +137,6 @@
         <!-- ============ 我的订阅 Tab 内容 ============ -->
         <Grid Grid.Row="2" x:Name="MySubsPanel" IsVisible="False" RowDefinitions="*,Auto" Padding="10,4">
 
-            <!-- 逐行列表 —— WMP 风格 -->
             <CollectionView Grid.Row="0" x:Name="MySubsList"
                             SelectionMode="Single"
                             SelectionChanged="OnSubscribedPodcastSelected">
@@ -118,7 +163,6 @@
                                        TextColor="{DynamicResource TextSecondary}"
                                        FontSize="11" MaxLines="1" LineBreakMode="TailTruncation"/>
                             </VerticalStackLayout>
-                            <!-- 状态 / 取消按钮 -->
                             <Border Grid.Column="2" VerticalOptions="Center"
                                     IsVisible="{Binding HasError}"
                                     StrokeShape="RoundRectangle 4"
@@ -146,7 +190,6 @@
                 </CollectionView.EmptyView>
             </CollectionView>
 
-            <!-- 底部添加按钮 -->
             <Button Grid.Row="1"
                     x:Name="AddRssButton"
                     Text="+ 添加RSS源"

@@ -3,6 +3,7 @@ namespace LingoWay.Views;
 using LingoWay.Presentation.ViewModels;
 using LingoWay.Domain.Models;
 using LingoWay.Domain.Interfaces;
+using LingoWay.Application.Services;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 
@@ -27,15 +28,20 @@ public partial class BrowsePage : ContentPage
 {
     private readonly BrowseViewModel _viewModel;
     private readonly IContentProvider _contentProvider;
+    private readonly CuratedRecommendationService _curationService;
     private readonly ObservableCollection<PodcastDisplayItem> _mySubsItems = new();
+    private readonly ObservableCollection<RecommendedPodcast> _recommendItems = new();
+    private RecommendedPodcast? _lastExpanded;
     private enum PageTab { Recommend, MySubs }
     private PageTab _currentTab = PageTab.Recommend;
 
-    public BrowsePage(BrowseViewModel viewModel, IContentProvider contentProvider)
+    public BrowsePage(BrowseViewModel viewModel, IContentProvider contentProvider, CuratedRecommendationService curationService)
     {
         InitializeComponent();
         _viewModel = viewModel;
         _contentProvider = contentProvider;
+        _curationService = curationService;
+        RecommendList.ItemsSource = _recommendItems;
         MySubsList.ItemsSource = _mySubsItems;
     }
 
@@ -75,8 +81,49 @@ public partial class BrowsePage : ContentPage
         catch { }
     }
 
-    private async Task RefreshRecommendAsync() =>
-        await _viewModel.LoadPodcastsCommand.ExecuteAsync(null);
+    private async Task RefreshRecommendAsync()
+    {
+        SetRecommendLoading();
+        try
+        {
+            var recs = await _curationService.GetRecommendationsAsync();
+            _recommendItems.Clear();
+            foreach (var r in recs) _recommendItems.Add(r);
+
+            if (_recommendItems.Count == 0)
+                SetRecommendEmpty("还没有推荐内容", "📻");
+        }
+        catch
+        {
+            SetRecommendError();
+        }
+    }
+
+    private void SetRecommendLoading()
+    {
+        RecommendEmptyText.Text = "正在加载推荐...";
+        RecommendEmptyIcon.Text = "⏳";
+        RecommendEmptyHint.IsVisible = false;
+    }
+
+    private void SetRecommendError()
+    {
+        RecommendEmptyText.Text = "网络错误，请稍后重试";
+        RecommendEmptyIcon.Text = "🌐";
+        RecommendEmptyHint.IsVisible = true;
+    }
+
+    private void SetRecommendEmpty(string text, string icon)
+    {
+        RecommendEmptyText.Text = text;
+        RecommendEmptyIcon.Text = icon;
+        RecommendEmptyHint.IsVisible = false;
+    }
+
+    private async void OnRecommendEmptyTapped(object? sender, TappedEventArgs e)
+    {
+        await RefreshRecommendAsync();
+    }
 
     private async Task RefreshMySubsAsync()
     {
@@ -105,6 +152,113 @@ public partial class BrowsePage : ContentPage
         catch { }
     }
 
+    // ==================== 推荐卡片操作按钮 ====================
+
+    /// <summary>点击推荐卡片 → 展开/收起右侧按钮</summary>
+    private void OnRecommendItemTapped(object? sender, TappedEventArgs e)
+    {
+        var item = (sender as BindableObject)?.BindingContext as RecommendedPodcast;
+        if (item == null) return;
+
+        // 收起上次展开的
+        if (_lastExpanded != null && _lastExpanded != item)
+            _lastExpanded.IsExpanded = false;
+
+        // 切换当前
+        item.IsExpanded = !item.IsExpanded;
+        _lastExpanded = item.IsExpanded ? item : null;
+    }
+
+    /// <summary>详情按钮 → 打开播客详情页</summary>
+    private async void OnRecommendDetailTapped(object? sender, TappedEventArgs e)
+    {
+        var item = (sender as BindableObject)?.BindingContext as RecommendedPodcast;
+        if (item == null) return;
+
+        var title = Uri.EscapeDataString(item.Title);
+        var author = Uri.EscapeDataString(item.Author);
+        var cover = Uri.EscapeDataString(item.CoverUrl);
+        var rss = Uri.EscapeDataString(item.RssUrl);
+        var desc = Uri.EscapeDataString(item.Description);
+
+        await Shell.Current.GoToAsync(
+            $"PodcastDetail?title={title}&author={author}&cover={cover}&rss={rss}&desc={desc}");
+    }
+
+    /// <summary>订阅按钮 → 添加到我的订阅</summary>
+    private async void OnRecommendSubscribeTapped(object? sender, TappedEventArgs e)
+    {
+        var item = (sender as BindableObject)?.BindingContext as RecommendedPodcast;
+        if (item == null) return;
+
+        if (!item.HasRssFeed)
+        {
+            await DisplayAlert("无法订阅", $"「{item.Title}」暂无 RSS 源", "确定");
+            return;
+        }
+
+        try
+        {
+            await _contentProvider.AddCustomPodcastAsync(item.RssUrl);
+            await DisplayAlert("已订阅", $"已订阅「{item.Title}」", "确定");
+            await RefreshMySubsAsync();
+        }
+        catch (InvalidOperationException ex) when (ex.Message.Contains("已经订阅"))
+        {
+            await DisplayAlert("提示", "该播客已在订阅列表中", "确定");
+        }
+        catch (Exception ex)
+        {
+            await DisplayAlert("订阅失败", ex.Message, "确定");
+        }
+    }
+
+    /// <summary>试听按钮 → 搜索最新一期试听</summary>
+    private async void OnRecommendPreviewTapped(object? sender, TappedEventArgs e)
+    {
+        var item = (sender as BindableObject)?.BindingContext as RecommendedPodcast;
+        if (item == null) return;
+
+        if (!item.HasRssFeed)
+        {
+            await DisplayAlert("暂无试听", $"「{item.Title}」没有可用的 RSS 源", "确定");
+            return;
+        }
+
+        try
+        {
+            // 先订阅，然后直接跳转播放
+            await _contentProvider.AddCustomPodcastAsync(item.RssUrl);
+            await RefreshMySubsAsync();
+            await Shell.Current.GoToAsync("//PlayerPage");
+        }
+        catch (InvalidOperationException ex) when (ex.Message.Contains("已经订阅"))
+        {
+            // 已订阅就直接跳到播放页
+            await Shell.Current.GoToAsync("//PlayerPage");
+        }
+        catch (Exception ex)
+        {
+            await DisplayAlert("试听失败", ex.Message, "确定");
+        }
+    }
+
+    /// <summary>分享按钮 → 复制 RSS 到剪贴板</summary>
+    private async void OnRecommendShareTapped(object? sender, TappedEventArgs e)
+    {
+        var item = (sender as BindableObject)?.BindingContext as RecommendedPodcast;
+        if (item == null) return;
+
+        if (string.IsNullOrEmpty(item.RssUrl))
+        {
+            await DisplayAlert("提示", $"「{item.Title}」没有 RSS 地址可分享", "确定");
+            return;
+        }
+
+        await Clipboard.Default.SetTextAsync(item.RssUrl);
+        await DisplayAlert("已复制", $"「{item.Title}」的 RSS 地址已复制到剪贴板", "确定");
+    }
+
     // --- 搜索 ---
     private void OnSearchTextChanged(object? sender, TextChangedEventArgs e) =>
         _ = _viewModel.SearchCommand.ExecuteAsync(e.NewTextValue);
@@ -127,16 +281,6 @@ public partial class BrowsePage : ContentPage
         }
         catch (Exception ex) { await DisplayAlert("订阅失败", ex.Message, "确定"); }
         finally { AddRssButton.IsEnabled = true; AddRssButton.Text = "+ 添加RSS源"; }
-    }
-
-    // --- 推荐列表选中 = 一键订阅 ---
-    private async void OnPodcastSelected(object? sender, SelectionChangedEventArgs e)
-    {
-        if (e.CurrentSelection.FirstOrDefault() is not Podcast podcast) return;
-        RecommendList.SelectedItem = null;
-        await _contentProvider.AddCustomPodcastAsync(podcast.RssUrl);
-        await DisplayAlert("已订阅", $"已订阅「{podcast.Title}」", "确定");
-        await RefreshMySubsAsync();
     }
 
     // --- 我的订阅：点击进入 ---
@@ -186,15 +330,11 @@ public partial class BrowsePage : ContentPage
             System.Diagnostics.Debug.WriteLine($"DeletePodcast failed: {ex.Message}");
         }
 
-        // 从列表中移除该项（无论 DB 删除成功与否，UI 上先移除）
         _mySubsItems.Remove(item);
 
         if (!deleted)
-        {
             await DisplayAlert("提示", "订阅已从列表移除，但数据库清理可能未完成", "确定");
-        }
 
-        // 刷新推荐列表
-        try { await _viewModel.LoadPodcastsCommand.ExecuteAsync(null); } catch { }
+        try { await RefreshRecommendAsync(); } catch { }
     }
 }

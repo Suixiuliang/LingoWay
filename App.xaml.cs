@@ -56,7 +56,19 @@ namespace LingoWay
 
         protected override Window CreateWindow(IActivationState? activationState)
         {
-            return new Window(new AppShell());
+            var splashPage = new SplashPage();
+            var window = new Window(splashPage);
+
+            // 启动动画播完后切换到主界面
+            splashPage.Completion.ContinueWith(_ =>
+            {
+                MainThread.BeginInvokeOnMainThread(() =>
+                {
+                    window.Page = new AppShell();
+                });
+            });
+
+            return window;
         }
     }
 }
